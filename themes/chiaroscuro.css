@@ -1773,7 +1773,6 @@ section.comparison {
   column-count: var(--columns);
   column-gap: var(--col-gap);
   column-fill: auto;            /* `balance` would centre the columns vertically */
-  line-height: 1.196;        /* tighter than the body: the columns are narrow */
 }
 
 section.comparison::before {   /* the horizontal line */
@@ -1897,7 +1896,6 @@ section.board > h2 {
 
   margin: 0;
   column-span: all;
-  line-height: 1.44;      /* the body leading, not the tighter one the columns take */
 }
 
 section:is(.comparison, .board).mirror > :is(h1 + p, h2) {
