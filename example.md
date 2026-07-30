@@ -286,7 +286,7 @@ Past four, prefer bare lists to prose. This slide is `mirror`ed, so the title is
 
 ---
 
-<!-- _class: board -->
+<!-- _class: board wide large -->
 
 # Board
 
