@@ -69,7 +69,7 @@ counts whatever the layout counts. The rest — `centered`, `no-rule`,
 
 <p align="center"><sub><code>comparison columns-4 mirror</code> ·
 <code>&lt;div class="right"&gt;</code> — the free field takes code ·
-<code>.huge .pale</code> — the subject as the illustration</sub></p>
+<code>.symbol .pale</code> — the subject as the illustration</sub></p>
 
 ## Install
 

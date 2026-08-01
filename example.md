@@ -2,6 +2,7 @@
 marp: true
 theme: chiaroscuro
 paginate: true
+math: mathjax
 ---
 
 <!-- _class: cover -->
@@ -34,7 +35,7 @@ One slide per layout
 
 <!-- _class: poster -->
 
-Titles go **here**
+# Titles go **here**
 
 ---
 
@@ -87,13 +88,27 @@ int median(std::vector<int>& v) {
 
 `--red` is the theme's own — the rule under this title, the dash in front of a list row, the bars of `agenda` — and `.accent-1` is that same red under a second name. The four beside it are yours, a ramp running from it to blue:
 
-<div class="extralarge">
+<div class="xxlarge">
 
 <span class="accent-1">**1**</span> <span class="accent-2">**2**</span> <span class="accent-3">**3**</span> <span class="accent-4">**4**</span> <span class="accent-5">**5**</span>
 
 </div>
 
 No rule in the theme reads one of them, so nothing on any other slide moves if you replace all five. They colour text; for a shape — a bar, a cell, a path of an inline SVG — read `var(--accent-3)` straight.
+
+---
+
+# Maths
+
+###### Marp
+
+An equation set on its own line takes more air above and below than a paragraph does — it is a block the eye stops on, not another row of the argument:
+
+$$
+T(n) = 2\,T\!\left(\frac{n}{2}\right) + O(n) = O(n \log n)
+$$
+
+Set inline, as $O(b^{d/2})$ is here, it stays inside the line and does not open it. Marp reaches for MathJax unless the deck asks for `math: katex`; the theme spaces the two identically, and `--font-math` is a KaTeX-only knob — MathJax writes outlines, and an outline has no typeface to set.
 
 ---
 
@@ -112,7 +127,7 @@ Title and body on the left half, the right half free for a photo. Write `![bg ri
 
 # Half, **free field**
 
-For something other than a photo, wrap it in `<div class="right">`. The field carries no type style of its own; compose it with `huge`, `red` or `pale` when you want one.
+For something other than a photo, wrap it in `<div class="right">`. The field carries no type style of its own; compose it with `symbol`, `red` or `pale` when you want one.
 
 <div class="right">
 
@@ -134,11 +149,11 @@ int main() {
 
 # Half, **few glyphs**
 
-The same field at the top of the scale. `huge` is the display step, 384 px, meant for a few glyphs or numbers and never for a sentence; `pale` takes it down to a tint of the page.
+The same field at the top of the scale. `symbol` is the display step, 384 px, and the name is the instruction: a few glyphs or a number, never a sentence. `pale` takes it down to a tint of the page.
 
 Together they turn the subject of the slide into the illustration of it — something to look at while the body is read, rather than one more thing to read.
 
-<div class="right huge pale">
+<div class="right symbol pale">
 
 O(n)
 
@@ -320,16 +335,24 @@ std::sort(v.begin(), v.end());
 
 <!-- _class: split -->
 
+<div class="left">
+
 # Light
 
 What the deck says out loud.
+
+</div>
+
+<div class="right">
 
 # Shadow
 
 What it leaves for the room to fill in.
 
+</div>
+
 ---
 
 <!-- _class: poster dark -->
 
-chiaroscuro
+# chiaroscuro

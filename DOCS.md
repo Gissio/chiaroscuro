@@ -102,8 +102,8 @@ get the fallback described above.
 | `trio` | Three photos in a row, each with its rule and caption. |
 | `band` | A full-bleed band of image across the top. |
 | `image` | One photo covering the slide, with an optional title. |
-| `split` | Half black, half white, a title and a line on each side. |
-| `poster` | One large sentence, centred and staying centred as it grows. |
+| `split` | Half black, half white, with a free field on each half. |
+| `poster` | One large statement, centred and staying centred as it grows. |
 | `comparison` | N columns hanging from a full-bleed line, a dot each. |
 | `board` | One free field across the top, with the title of `comparison`. |
 | `agenda` | Red title and a numbered list set against big grey numerals. |
@@ -190,7 +190,7 @@ Roughly sixty columns of code fit across it. For a single big glyph, compose the
 field with the type helpers rather than reaching for CSS:
 
 ```markdown
-<div class="right huge pale">
+<div class="right symbol pale">
 
 ∴
 
@@ -242,29 +242,68 @@ picture itself.
 # Optional title
 ```
 
-**`split`** — two `h1`s with a line each. The first falls on the black half.
+**`split`** — half the slide black, half white, with a free field on each half.
 
 ```markdown
 <!-- _class: split -->
+
+<div class="left">
 
 # Before
 
 What it used to be.
 
+</div>
+
+<div class="right">
+
 # After
 
 What it is now.
+
+</div>
 ```
 
-**`poster`** — a single sentence, centred on both axes, staying centred as it
-grows to two or three rows. Bold runs come out red. Add `dark` for the black
-version.
+The field is the same one `half`, `side` and `board` use — a half-slide column,
+full height, contents stacked and centred — so each side takes a title, a
+paragraph, a list, a code panel, a picture or an inline SVG, at whatever length
+it needs.
+
+Each half is its own colour scope, so everything inside comes out right without
+your having to think about it: a code panel on the black half gets the dark
+panel and the dark syntax colours, a table gets the light rule, an SVG is
+inverted. `mirror` moves the black half to the right and the ink follows; the
+fields do not move.
+
+**`poster`** — a single large statement, centred on both axes, staying centred as
+it grows to two or three rows. Add `dark` for the black version.
+
+```markdown
+<!-- _class: poster -->
+
+# Everything in its **place**
+```
+
+The statement is a title, written `#` like every other title in the theme.
+Anything else on the slide is ordinary content at the body size, so a poster can
+carry a line under its statement, or a list, without the two competing:
+
+```markdown
+<!-- _class: poster -->
+
+# Everything in its **place**
+
+And the line underneath, at the size of any other line in the deck.
+
+- or a list, whose rows range left while the block stays centred
+```
 
 **`comparison`** — one `h3` per column, then its text and list; the `h1` goes
-last and lands at the bottom left, or bottom right with `mirror`. A paragraph
-written *after* the `h1` lands beside it, in the same bottom strip `duo`, `trio`
-and `band` use, so a subtitle sits in the same place whichever of the four you
-are on. The row of column headings starts on the same line as the title of an
+last and lands at the bottom left, or bottom right with `mirror`. An `h2` lands
+beside it, in the same bottom strip `duo`, `trio` and `band` use, so a subtitle
+sits in the same place whichever of the four you are on — and here, where the
+strip is placed and the columns are in flow, `##` is the only way to reach it.
+The row of column headings starts on the same line as the title of an
 ordinary slide, and the columns run between the same side margins as every
 other layout — only the gutter between them is the template's own. Two columns
 by default, `columns-3` … `columns-6` for more. Past four the columns get narrow — prefer bare lists over
@@ -404,17 +443,31 @@ hand never invents a size the deck does not already use:
 | `.small` | 28 | Smaller than the body — what code blocks and tables are set in. |
 | `.medium` | 32 | The body size — how you get back to it after reaching for another. |
 | `.large` | 48 | A line that needs to carry further than the body. |
-| `.extralarge` | 80 | A statement, a figure — the title size, off a title. |
-| `.huge` | 384 | Display: one glyph or one number, not a sentence. |
+| `.xlarge` | 64 | Between the two — bigger than a line of the body, short of a title. |
+| `.xxlarge` | 80 | A statement, a figure — the title size, off a title. |
+
+Above those the **symbol family**, one helper per step, for a glyph or a number
+rather than a sentence — the name is the instruction. All six carry the display
+weight and a line box tight around the glyph:
+
+| Helper | Size | For |
+| --- | --- | --- |
+| `.symbol-xxsmall` | 128 | A numeral standing beside text rather than behind it. |
+| `.symbol-xsmall` | 192 | |
+| `.symbol-small` | 256 | |
+| `.symbol` | 384 | The default rung — what you get when you do not ask for one. |
+| `.symbol-large` | 512 | |
+| `.symbol-xlarge` | 768 | The size of the `?` on `question`. One glyph, and only one. |
 
 Plus `.gray`, `.pale` and `.light` for tone and weight, and `.red` with the four
 colours beside it — see *The content series* below.
 
 The first four **carry into a code block and into a table**, which is the only
 way to resize either: neither a fenced block nor a markdown table takes a class
-of its own, so say it further up and it reaches down. `.extralarge` carries into
-a table as well but not into code — a short table at 80 is a figure, a listing
-at 80 is not something anyone wants — and `.huge` into neither, being one glyph.
+of its own, so say it further up and it reaches down. `.xlarge` and `.xxlarge`
+carry into a table but not into code — a short table set that large is a figure,
+a listing at 64 or 80 is not something anyone wants — and the symbol six into
+neither, at any size, being glyphs.
 
 ````markdown
 <!-- _class: xsmall -->    the whole slide, code and tables included
@@ -441,6 +494,37 @@ that each is declared **twice**, as `section.name` and as `.name`: Marpit scopes
 a selector that does not start with `section` as a descendant of the slide, so
 the bare form alone reaches a `div` inside the slide but never the slide itself,
 and a class directive using it would silently do nothing at all.
+
+### The scale behind them
+
+Twelve steps in two families of six, on the 4 px grid. **`content`** is type
+meant to be read; **`symbol`** is type meant to be looked at — a glyph, a
+numeral, a formula of three characters, never a sentence at any of its six
+sizes. Within a family each step is named for where it falls and nothing else,
+which is why the variable says `--fs-content-large` rather than `--fs-subtitle`:
+48 is also the size of a blockquote, of a row of `agenda` and of a column
+heading on `comparison`, and a name with room for one job would have been wrong
+about the other three.
+
+| Family | Steps |
+| --- | --- |
+| `--fs-content-*` | `xsmall` 24 · `small` 28 · `medium` 32 · `large` 48 · `xlarge` 64 · `xxlarge` 80 |
+| `--fs-symbol-*` | `xxsmall` 128 · `xsmall` 192 · `small` 256 · `medium` 384 · `large` 512 · `xlarge` 768 |
+
+The symbol six are every multiple of 64 at 2, 3, 4, 6, 8 and 12 times, so the
+ratio between neighbours alternates 3:2 and 4:3 and every second step is a
+doubling — 128·256·512 and 192·384·768, two doubling series interleaved. If you
+retune them, pick sizes that hold the alternation rather than sizes that look
+round on their own.
+
+Four of the steps the theme never spends on anything itself — **64**, **192**,
+**256** and **512** — but each has a helper like every other, so a deck can ask
+for any of the twelve. A step the theme does not use is not the same as a step
+you cannot reach.
+
+Every step has a helper, and all but one are named after the step they set. The
+exception is `.symbol`, which sets `--fs-symbol-medium` (384) as the bare name of
+its family — the rung you get when you do not ask for one.
 
 ### The content series
 
@@ -647,7 +731,7 @@ There are two on the page, and the theme never reaches for a third:
 
 | Weight | Where |
 | --- | --- |
-| **800** | Headings, table headers, the numerals on `agenda`, `.huge`, `**strong**` and links in body copy, and the header and footer. |
+| **800** | Headings, table headers, the numerals on `agenda`, `.symbol`, `**strong**` and links in body copy, and the header and footer. |
 | **300** | Running text, everywhere, on every layout, at every size. |
 
 Montserrat is a variable font, so both are real weights rather than the
@@ -686,8 +770,9 @@ so it changes hue without also changing shape. On the black slides it comes out
 red against white or black text alike.
 
 In body copy `**strong**` stays what it always was — a weight change, not a
-colour. The one exception is `poster`, whose sentence is usually a plain
-paragraph and whose strong runs come out red too.
+colour. That holds on `poster` too: its statement is a heading, so its bold is
+red like any heading's, and the supporting text under it is body copy like any
+other.
 
 ## Exporting
 
@@ -745,14 +830,26 @@ replace all five; nothing else in the deck moves.
 Change `--red` and you have a different theme, in one line — and the head of the
 series follows it, since `--accent-1` is that same red rather than a copy of it.
 
-Maths, if you turn Marp's `math` on, is set in `--font-math`, which ships as
-Times New Roman. KaTeX names its own faces on every span it writes, so the
-theme has to reach the spans to override them — which it does. Worth knowing
-before you change it: KaTeX measures its own faces and writes the spacing into
-the markup in ems, so any other family is set on metrics that are not its own,
-and a family missing the mathematical operators — quantifiers, relations,
-arrows — will fall back glyph by glyph and set one formula in two faces. Set it
-to `unset` to have KaTeX's own faces back.
+Maths comes out of one of two engines, and which one decides how much of it the
+theme can reach. Marp picks **MathJax** unless the deck asks for the other with
+`math: katex` in the front matter, and MathJax in its SVG mode writes glyph
+outlines rather than text — a `<path>` takes no typeface, so no stylesheet can
+change the face it is set in.
+
+A displayed equation (`$$…$$`) gets more air above and below it than a paragraph
+does, on either engine: it is a block the eye stops on, and at the paragraph gap
+it read as one more line of the paragraph it had just interrupted. The theme
+zeroes what each engine puts there and spaces the two identically, so a slide
+looks the same whichever one built it.
+
+`--font-math` is therefore a **KaTeX-only** knob. It ships as Times New Roman.
+KaTeX names its own faces on every span it writes, so the theme has to reach the
+spans to override them — which it does. Worth knowing before you change it:
+KaTeX measures its own faces and writes the spacing into the markup in ems, so
+any other family is set on metrics that are not its own, and a family missing the
+mathematical operators — quantifiers, relations, arrows — will fall back glyph by
+glyph and set one formula in two faces. Set it to `unset` to have KaTeX's own
+faces back.
 
 Montserrat is **embedded in the CSS as base64**, as a variable font of weight
 100–900 in the `latin` and `latin-ext` subsets. Composing and exporting need

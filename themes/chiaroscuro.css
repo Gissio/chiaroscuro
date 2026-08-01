@@ -23,7 +23,9 @@
  *            image · split · poster · comparison · board · agenda
  * Modifiers  dark · mirror · centered · no-rule · no-indent ·
  *            columns-2 … columns-6 · debug
- * Text       .xsmall .small .medium .large .extralarge .huge
+ * Text       .xsmall .small .medium .large .xlarge .xxlarge
+ *            .symbol-xxsmall .symbol-xsmall .symbol-small .symbol
+ *            .symbol-large .symbol-xlarge
  *            .red .gray .pale .light
  *
  * Everything a layout can change is a variable, declared in `:root` and reset
@@ -176,8 +178,8 @@
    * leading changes is the gap between two lines of the same title, which is
    * the one thing it was raised for.
    */
-  --title-half-leading: 6px;       /* (1.2 - 1.05) x --fs-title / 2 */
-  --title-line: 96px;              /* one line of title: 1.2 x --fs-title */
+  --title-half-leading: 6px;       /* (1.2 - 1.05) x --fs-content-xxlarge / 2 */
+  --title-line: 96px;              /* one line of title: 1.2 x --fs-content-xxlarge */
 
   --rule-width: 667px;
   --rule-height: 20px;
@@ -198,52 +200,115 @@
   /*
    * --- Type scale -------------------------------------------------------
    *
-   * Eight steps, all on the 4 px grid, named by the job they do, one name each.
-   * No size is written as a literal anywhere else in the file: if you want to
-   * retune the theme, every type decision is on this list.
+   * Twelve steps, all on the 4 px grid. No size is written as a literal
+   * anywhere else in the file: if you want to retune the theme, every type
+   * decision is on this list.
    *
-   *   24  28  32  48  80  112  384  768
+   *   content   24  28  32  48  64  80
+   *   symbol   128  192  256  384  512  768
    *
-   * It used to be thirteen, with four sizes that were each a step away from a
-   * step already on the list: 88 next to 80 for the titles, 52 next to 48 for
-   * the list rows and column headings, 36 next to 32 for the captions, and a 32
-   * of its own for the cover credits. Four sizes nobody could tell apart at a
-   * glance, and four more names to keep straight. Merging them down loses
-   * nothing an audience can see and takes a quarter of the scale out of the
-   * file — every merge went to the smaller of the two, so nothing grew.
+   * The symbol six are every multiple of 64 at 2, 3, 4, 6, 8 and 12 times, so
+   * the ratio between neighbours alternates 3:2 and 4:3 and every second step
+   * is a doubling — 128·256·512 and 192·384·768, two doubling series
+   * interleaved. That is worth keeping if you retune them: pick sizes that hold
+   * the alternation rather than sizes that look round on their own.
+   *
+   * The steps fall in two families, and which one a size is in says more about
+   * it than any other thing you could name it after. `content` is type meant to
+   * be READ — a paragraph, a heading, a caption, a line of code. `symbol` is
+   * type meant to be LOOKED AT: a glyph, a numeral, a formula of three
+   * characters, never a sentence at any of its six sizes. Within a family a
+   * step is named for where it falls and nothing else, so both run the same
+   * ladder of words — six rungs each, one carrying an `xxlarge` on top and the
+   * other an `xxsmall` at the bottom.
+   *
+   * Naming them for their position rather than for their job is deliberate, and
+   * it is a reversal. They used to be `--fs-body`, `--fs-subtitle`, `--fs-title`
+   * and so on, one job each, and the job names went wrong in three separate
+   * ways. They over-claimed: `--fs-subtitle` was also the size of a blockquote,
+   * of a row of `agenda` and of a column heading on `comparison`, none of which
+   * is a subtitle. They went stale: `--fs-mark` was the "?" on `question` and
+   * pointed at the one thing it is not, since the theme leaves `<mark>`
+   * deliberately unstyled. And they disagreed with the helper classes an author
+   * actually types, so `.large` set `--fs-subtitle` and `.xlarge` set
+   * `--fs-title` — a mismatch that is exactly how the two of them once got
+   * tangled together. A position cannot go stale, cannot over-claim, and reads
+   * the same from the CSS as from the markdown.
+   *
+   * What it costs is that a rule no longer says what it is FOR. That is what the
+   * comment above each one is for instead, and it is the better place for it: a
+   * name has room for one job, and most of these do several.
+   *
+   * Not every step is used by the theme itself — nothing here sets type at 64,
+   * 192, 256 or 512 — but every one of the twelve has a helper, so a deck can
+   * ask for any of them. A step the theme does not spend is not the same as a
+   * step an author cannot reach, and only the first is true of these four.
+   *
+   * What follows is the tally of everything the scale has dropped, and each
+   * entry is a size somebody once thought the theme needed. Read it as a record
+   * of cuts and not as the arithmetic behind the twelve above: the four steps
+   * the theme does not spend were ADDED, to finish two families the ladder of
+   * names had made obvious, and nothing was cut to make room for them.
+   *
+   * The list ran to thirteen at its longest, with four sizes that were each a
+   * step away from a step already on it: 88 next to 80 for the titles, 52 next
+   * to 48 for the list rows and column headings, 36 next to 32 for the
+   * captions, and a 32 of its own for the cover credits. Four sizes nobody
+   * could tell apart at a glance, and four more names to keep straight. Merging
+   * them down loses nothing an audience can see and takes a quarter of the
+   * scale out of the file — every one went to the smaller of the two, so
+   * nothing grew.
    *
    * The tenth to go was a 16 of its own for the header and the footer, which is
    * a size for a page held in the hand and not for a wall: a photo credit set
    * in it is not discreet, it is unreadable from the third row. They take the
    * step the rest of the small print takes.
    *
-   * The eleventh was a 96 for the `question` title and the `extralarge` helper,
+   * The eleventh was a 96 for the `question` title and the `xlarge` helper,
    * one step above the title's 80 — the same pattern as the four merged sizes,
    * and it merged the same way, down to the step already on the list.
+   *
+   * The twelfth was a 112 for the numerals on `agenda`, and it is the one merge
+   * that went the other way. The symbol family begins at 128 and there was
+   * nothing below it to fall to, so either the scale carried a step of its own
+   * for one pseudo-element or the numerals grew by 16. They grew — which makes
+   * this the only cut on the list an audience can see, and the only one worth
+   * checking against a layout. The numeral is absolutely positioned and never
+   * pushed the row it stands behind, but at 1.05 it now stands 134.4px tall in
+   * a row whose min-height is 136. That 1.6px is the clearance, and it is the
+   * thing to watch if either number is ever retuned.
    */
-  --fs-xsmall: 24px;      /* a long code listing, a table that will not fit */
-  --fs-small: 28px;       /* code, tables, header and footer, dense layouts */
-  --fs-body: 32px;        /* body, captions, cover credits — every layout */
-  --fs-h2: 48px;          /* h2, h3, list rows on `agenda`, headings on `comparison` */
-  --fs-title: 80px;       /* h1, on every layout that has one */
-  --fs-number: 112px;     /* numerals on `agenda` */
-  --fs-huge: 384px;       /* the `huge` helper */
-  --fs-mark: 768px;       /* the giant "?" on `question` */
+  /* content — type meant to be read */
+  --fs-content-xsmall:   24px;   /* a long code listing, a table that will not fit */
+  --fs-content-small:    28px;   /* code, tables, the eyebrow, captions, header and footer */
+  --fs-content-medium:   32px;   /* the body, on every layout: h4, h5, cover credits */
+  --fs-content-large:    48px;   /* h2, h3, blockquotes, rows of `agenda`, headings on `comparison` */
+  --fs-content-xlarge:   64px;   /* the `xlarge` helper; nothing in the theme sets it */
+  --fs-content-xxlarge:  80px;   /* h1, on every layout that has one, and `poster` */
+
+  /* symbol — type meant to be looked at */
+  --fs-symbol-xxsmall:  128px;   /* the numerals behind the rows of `agenda`, and its helper */
+  --fs-symbol-xsmall:   192px;   /* the `symbol-xsmall` helper */
+  --fs-symbol-small:    256px;   /* the `symbol-small` helper */
+  --fs-symbol-medium:   384px;   /* what the bare `symbol` helper sets */
+  --fs-symbol-large:    512px;   /* the `symbol-large` helper */
+  --fs-symbol-xlarge:   768px;   /* the giant "?" on `question`, and its helper */
 
   /*
    * Which step a code listing and a table are set at. Variables and not fixed
    * steps, because neither a fenced code block nor a markdown table can be
    * given a class of its own: the size helpers below set these as well, so
    * putting one of them on the slide, or on a div wrapped round the block,
-   * carries into the code panel and into the table. Four helpers set both;
-   * `extralarge` sets only the table, for the reason given down there.
+   * carries into the code panel and into the table. The first four content
+   * helpers set both; `xlarge` and `xxlarge` set only the table, and the symbol
+   * six set neither, for the reasons given down there.
    *
    * Without them, the size written on `pre code` and on `table` wins over the
    * size the helper set further up — inheritance loses to a declaration — and
    * the helper looks like it does nothing at all.
    */
-  --fs-code: var(--fs-small);
-  --fs-table: var(--fs-small);
+  --fs-code: var(--fs-content-small);
+  --fs-table: var(--fs-content-small);
 
   /*
    * --- Weight -----------------------------------------------------------
@@ -305,11 +370,22 @@
  * panel, a table rule or a slide number comes out right on all four without a
  * single per-layout override.
  *
- * `split` is deliberately not here: it is half black and half white at once, so
- * no one set of values would be right for both of its columns, and it colours
- * its two halves by hand.
+ * `split` is half black and half white at once, so no one set of these would be
+ * right for the whole slide — but each of its halves is a box, and a box is a
+ * scope. So the black half takes them and the white half is left alone, and
+ * `split` gets the same treatment as the four above without a slide-wide
+ * inversion. It used to colour its halves by hand, setting nothing but `color`,
+ * which was enough while a half could only hold a title and a line: the moment
+ * one could hold a code chip, that chip came out white-on-light-grey, because
+ * only the ink had crossed to the dark side and --code-bg had not.
+ *
+ * Which half is black flips with `mirror`, hence the two arms — and the first
+ * has to exclude `mirror`, or a mirrored slide would match both and take the
+ * inverted values on both sides.
  */
-section:is(.dark, .cover, .question, .image) {
+section:is(.dark, .cover, .question, .image),
+section.split:not(.mirror) > .left,
+section.split.mirror       > .right {
   --bg: var(--black);
   --fg: var(--white);
   --gray: #9a9a9a;
@@ -344,7 +420,10 @@ section:is(.cover, .image) { --gray: var(--gray-photo); }
  * anyway. Photographs are unaffected — the selector only matches SVG.
  */
 section:is(.dark, .cover, .question, .image) img[src$=".svg" i],
-section:is(.dark, .cover, .question, .image) img[src^="data:image/svg"] {
+section:is(.dark, .cover, .question, .image) img[src^="data:image/svg"],
+section.split:not(.mirror) > .left  :is(img[src$=".svg" i], img[src^="data:image/svg"]),
+section.split.mirror       > .right :is(img[src$=".svg" i], img[src^="data:image/svg"]) {
+  /* the black half of a split, same reasoning as the four layouts above */
   filter: invert(1) hue-rotate(180deg);
 }
 
@@ -394,7 +473,7 @@ section {
   color: var(--fg);
   font-family: var(--sans);
   font-weight: var(--fw-body);
-  font-size: var(--fs-body);
+  font-size: var(--fs-content-medium);
   line-height: 1.44;
   letter-spacing: 0;
 
@@ -460,7 +539,7 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
   position: relative;
   display: block;
-  font-size: var(--fs-title);
+  font-size: var(--fs-content-xxlarge);
   line-height: 1.2;
   margin-top: calc(77px - var(--title-half-leading));
   margin-bottom: calc(151px - var(--title-half-leading));
@@ -487,10 +566,10 @@ h1::after {
 section:is(.question, .split, .poster, .agenda) h1::after,
 section.no-rule h1::after { display: none; }
 
-h2 { font-size: var(--fs-h2); line-height: 1.2; margin-bottom: var(--space-7); }
-h3 { font-size: var(--fs-h2); line-height: 1.2; margin-bottom: var(--space-6); }
-h4 { font-size: var(--fs-body); line-height: 1.2; margin-bottom: var(--space-5); }
-h5 { font-size: var(--fs-body); line-height: 1.2; margin-bottom: var(--space-4); }
+h2 { font-size: var(--fs-content-large); line-height: 1.2; margin-bottom: var(--space-7); }
+h3 { font-size: var(--fs-content-large); line-height: 1.2; margin-bottom: var(--space-6); }
+h4 { font-size: var(--fs-content-medium); line-height: 1.2; margin-bottom: var(--space-5); }
+h5 { font-size: var(--fs-content-medium); line-height: 1.2; margin-bottom: var(--space-4); }
 
 /*
  * The smallest heading is the eyebrow — the short label that sits above a title
@@ -516,7 +595,7 @@ h6 {
   top: 63px;
   left: var(--margin-x);
   right: var(--margin-x);
-  font-size: var(--fs-small);
+  font-size: var(--fs-content-small);
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -564,15 +643,20 @@ section:is(.half, .side, .duo, .trio, .band, .image, .comparison, .board) h6 {
 }
 
 /*
- * In a heading, `**strong**` picks out a word in red — on every layout, and on
- * `poster`, whose sentence is usually a plain paragraph set in title weight. It
- * is a colour accent and nothing else: `font-weight: inherit` keeps the
- * surrounding weight, so the word changes hue without also changing shape.
+ * In a heading, `**strong**` picks out a word in red — on every layout, `poster`
+ * included, whose statement is a heading like any other. It is a colour accent
+ * and nothing else: `font-weight: inherit` keeps the surrounding weight, so the
+ * word changes hue without also changing shape.
  *
  *   # Everything in its **place**
+ *
+ * `section.poster strong` used to be on this list, back when a poster's
+ * statement was a bare paragraph and every block on the slide was set at the
+ * display size. With the statement written as a heading the heading rule covers
+ * it, and body copy under it keeps the bold it has everywhere else — a weight,
+ * not a colour.
  */
-h1 strong, h2 strong, h3 strong, h4 strong, h5 strong, h6 strong,
-section.poster strong {
+h1 strong, h2 strong, h3 strong, h4 strong, h5 strong, h6 strong {
   color: var(--red);
   font-weight: inherit;
 }
@@ -665,13 +749,21 @@ section:is(.cover, .question, .half, .side, .duo, .trio, .band, .image,
 }
 
 /*
- * Text helpers. The five sizes are steps of the scale above, so asking for one
- * by hand never invents a size the theme does not already use. `medium` is the
- * body size, worth naming so you can get back to it after reaching for one of
- * the others; `huge` is the display step, for one glyph or one number rather
- * than a sentence.
- */
-/*
+ * Text helpers, one per step of the scale above, so asking for a size by hand
+ * never invents one the theme does not already use. The content family is
+ * reached by the bare words, because it is the ordinary case and an author
+ * writing `xsmall` means text; the symbol family carries the prefix.
+ *
+ * `medium` is the body size, worth naming so you can get back to it after
+ * reaching for one of the others. `symbol` is the display step, for one glyph
+ * or one number rather than a sentence.
+ *
+ * There is one helper per step and, with a single exception, each is named
+ * after the step it sets. The exception is `symbol`, which sets the middle of
+ * its own family: it is the bare name of the family, the rung you get when you
+ * do not ask for one, and that is what makes `symbol` rather than
+ * `symbol-medium` the thing to type.
+ *
  * Every one of them is written twice, and it has to be. Marpit scopes a
  * selector that does not start with `section` as a DESCENDANT of the slide —
  * `.xsmall` comes out of the compiler as `… > section .xsmall` — so the bare
@@ -680,19 +772,39 @@ section:is(.cover, .question, .half, .side, .duo, .trio, .band, .image,
  * nothing errors, nothing warns, the text comes out at the size it already was.
  * `section.xsmall` is the form that matches the slide, and the two together are
  * what make `<!-- _class: xsmall -->` and `<div class="xsmall">` the same tool.
+ *
+ * How far a helper carries is not the same for all of them, and the asymmetry
+ * is the point. The first four content steps reach a code listing and a table
+ * as well as the text. The top two reach the table but not the listing: a table
+ * of three rows set that large is a figure — the thing on the slide rather than
+ * a reference beside it — while a code listing at 64 or 80 is nothing anybody
+ * wants. The symbol six reach neither, at any size: they are glyphs.
  */
-section.xsmall,     .xsmall     { font-size: var(--fs-xsmall); --fs-code: var(--fs-xsmall); --fs-table: var(--fs-xsmall); }  /*  24 */
-section.small,      .small      { font-size: var(--fs-small);  --fs-code: var(--fs-small);  --fs-table: var(--fs-small); }   /*  28 */
-section.medium,     .medium     { font-size: var(--fs-body);   --fs-code: var(--fs-body);   --fs-table: var(--fs-body); }    /*  32, the body */
-section.large,      .large      { font-size: var(--fs-h2);     --fs-code: var(--fs-h2);     --fs-table: var(--fs-h2); }      /*  48 */
+section.xsmall,   .xsmall   { font-size: var(--fs-content-xsmall);   --fs-code: var(--fs-content-xsmall);  --fs-table: var(--fs-content-xsmall); }   /*  24 */
+section.small,    .small    { font-size: var(--fs-content-small);    --fs-code: var(--fs-content-small);   --fs-table: var(--fs-content-small); }    /*  28 */
+section.medium,   .medium   { font-size: var(--fs-content-medium);   --fs-code: var(--fs-content-medium);  --fs-table: var(--fs-content-medium); }   /*  32, the body */
+section.large,    .large    { font-size: var(--fs-content-large);    --fs-code: var(--fs-content-large);   --fs-table: var(--fs-content-large); }    /*  48 */
+section.xlarge,   .xlarge   { font-size: var(--fs-content-xlarge);                                         --fs-table: var(--fs-content-xlarge); }   /*  64 */
+section.xxlarge,  .xxlarge  { font-size: var(--fs-content-xxlarge);                                        --fs-table: var(--fs-content-xxlarge); }  /*  80 */
+
 /*
- * `extralarge` carries into a table but not into a code listing, and the
- * asymmetry is the point: a table of three rows set at 80 is a figure — the
- * thing on the slide rather than a reference beside it — and a code listing at
- * 80 is nothing anybody wants. `huge` sets neither: it is one glyph.
+ * The symbol six. Display weight and a line box tight around the glyph are what
+ * make them a family rather than six font sizes, so those are said once here
+ * and each step below is a size and nothing else.
  */
-section.extralarge, .extralarge { font-size: var(--fs-title); --fs-table: var(--fs-title); }    /*  80 */
-section.huge,       .huge       { font-size: var(--fs-huge); font-weight: var(--fw-title); line-height: 1; }  /* 384 */
+section.symbol,           .symbol,
+section.symbol-xxsmall,   .symbol-xxsmall,
+section.symbol-xsmall,    .symbol-xsmall,
+section.symbol-small,     .symbol-small,
+section.symbol-large,     .symbol-large,
+section.symbol-xlarge,    .symbol-xlarge   { font-weight: var(--fw-title); line-height: 1; }
+
+section.symbol-xxsmall,   .symbol-xxsmall  { font-size: var(--fs-symbol-xxsmall); }  /* 128 */
+section.symbol-xsmall,    .symbol-xsmall   { font-size: var(--fs-symbol-xsmall); }   /* 192 */
+section.symbol-small,     .symbol-small    { font-size: var(--fs-symbol-small); }    /* 256 */
+section.symbol,           .symbol          { font-size: var(--fs-symbol-medium); }   /* 384, the default rung */
+section.symbol-large,     .symbol-large    { font-size: var(--fs-symbol-large); }    /* 512 */
+section.symbol-xlarge,    .symbol-xlarge   { font-size: var(--fs-symbol-xlarge); }   /* 768 */
 
 /*
  * `wide` is width where the others are size, and it exists for the table: a
@@ -812,10 +924,16 @@ pre code {
 /* ------------------------------------------------------------------ */
 
 /*
- * Maths. Marp sets `$…$` with KaTeX, which ships faces of its own and names
- * them on every span it writes — so a family declared on the .katex wrapper is
- * overridden from underneath and does nothing. The override has to reach the
- * spans, which is what the descendant selector and the !important are for.
+ * Maths, and which engine is setting it. Marp has two and picks MathJax unless
+ * the deck asks for the other — `math: katex` in the front matter. The choice
+ * decides what CSS can still reach: KaTeX writes spans of live text, MathJax in
+ * its SVG mode writes glyph outlines, and a `<path>` takes no typeface.
+ *
+ * So --font-math is a KaTeX-only knob, and it is written as one. KaTeX ships
+ * faces of its own and names them on every span it writes, so a family declared
+ * on the .katex wrapper is overridden from underneath and does nothing: the
+ * override has to reach the spans, which is what the descendant selector and the
+ * !important are for.
  *
  * The face is a variable because it is a real choice and not an obvious one:
  * KaTeX measures its own faces and writes the spacing into the markup in ems,
@@ -828,6 +946,36 @@ pre code {
 :root { --font-math: 'Times New Roman', Times, serif; }
 
 .katex, .katex * { font-family: var(--font-math) !important; }
+
+/*
+ * A displayed equation (`$$…$$`) gets more air above and below than a paragraph
+ * does. It is a block the eye stops on rather than another row of the argument,
+ * and at the paragraph gap it read as one more line of the paragraph it had
+ * just interrupted.
+ *
+ * The gap goes on the `p` wrapping the formula, which is the one thing the two
+ * engines agree on: both leave the block they write inside a paragraph of its
+ * own — `<p><span class="katex-display">` and `<p><mjx-container display="true">`
+ * — so one rule covers both and neither needs naming twice. The two inner
+ * blocks are zeroed for the same reason: MathJax writes `style="margin: 0"`
+ * inline and KaTeX writes 1em of its own, so left alone the same slide would be
+ * spaced differently depending on an engine the theme does not choose.
+ *
+ * `margin-top` and `margin-bottom` rather than the shorthand: this is a child of
+ * the section and carries the body indent in `margin-left`.
+ *
+ * The top margin collapses with the bottom margin of whatever precedes it, so
+ * this is the gap either way round and not that gap added to a paragraph's.
+ */
+p:has(> .katex-display, > mjx-container[display='true']) {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.katex-display, mjx-container[display='true'] {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
 /*
  * A row of a table is a row of running text and is spaced like one: the padding
@@ -850,7 +998,7 @@ blockquote {
   margin-bottom: var(--space-4);
   padding: 0;
   border: none;
-  font-size: var(--fs-h2);
+  font-size: var(--fs-content-large);
   line-height: 1.25;
 }
 blockquote::before, blockquote::after { content: none; }
@@ -876,7 +1024,7 @@ figure { margin-bottom: var(--space-4); }
 figure img { display: block; }
 figcaption {
   margin-top: var(--space-2);
-  font-size: var(--fs-small);
+  font-size: var(--fs-content-small);
   color: var(--gray);
 }
 
@@ -907,7 +1055,7 @@ section::after {                 /* slide number */
   height: auto;
   padding: 0;
   background: none;
-  font-size: var(--fs-small);
+  font-size: var(--fs-content-small);
   line-height: 1;
   color: var(--gray);
   text-align: right;
@@ -961,7 +1109,7 @@ section:is(.half, .side):has(> .left)::after {
 header, footer {
   position: absolute;
   top: var(--page-inset);
-  font-size: var(--fs-small);
+  font-size: var(--fs-content-small);
   font-weight: var(--fw-title);
   line-height: 1;
   color: var(--gray);
@@ -1009,7 +1157,7 @@ section[data-marpit-advanced-background='pseudo'][data-marpit-advanced-backgroun
   right: var(--page-inset);
   margin: 0;
   padding: 0;
-  font-size: var(--fs-small);
+  font-size: var(--fs-content-small);
   font-weight: var(--fw-title);
   line-height: 1;
   letter-spacing: 0.02em;
@@ -1061,7 +1209,7 @@ section.cover h1 {
   top: calc(603px - var(--title-half-leading));
   margin: 0;
   padding: 0;
-  font-size: var(--fs-title);
+  font-size: var(--fs-content-xxlarge);
   text-transform: uppercase;   /* the cover is always set in caps */
 }
 
@@ -1075,7 +1223,7 @@ section.cover p {
   top: 802px;
   margin: 0;
   max-width: none;
-  font-size: var(--fs-body);
+  font-size: var(--fs-content-medium);
   line-height: 55px;           /* one credit per line, 55 px apart */
 }
 
@@ -1127,7 +1275,7 @@ section.question::before {     /* the giant "?" */
   text-align: center;
   translate: 19.5px 0;
   top: 305px;
-  font-size: var(--fs-mark);
+  font-size: var(--fs-symbol-xlarge);
   font-weight: var(--fw-title);
   line-height: 1;
   color: var(--red);
@@ -1150,7 +1298,7 @@ section.question h1 {
   width: 1597px;
   margin: 0;
   color: var(--black);
-  font-size: var(--fs-title);
+  font-size: var(--fs-content-xxlarge);
   line-height: 1.2;
 }
 
@@ -1271,7 +1419,7 @@ section.side > ul > li { margin-bottom: var(--space-3); }
  * the `right` class instead of using a background image. The field is free and
  * carries no type style of its own: whatever you put in it is stacked and
  * centred on both axes, so it takes a code block, a list, a table, an inline
- * SVG, or a single big glyph if you compose it with `huge`.
+ * SVG, or a single big glyph if you compose it with `symbol`.
  *
  *   <div class="right">
  *
@@ -1281,7 +1429,7 @@ section.side > ul > li { margin-bottom: var(--space-3); }
  *
  *   </div>
  *
- *   <div class="right huge pale">∴</div>
+ *   <div class="right symbol pale">∴</div>
  *
  * The field runs the full half with no inset of its own, so a code block gets
  * all 960 px — the widest the theme has to offer, and about 60 columns. What
@@ -1446,13 +1594,26 @@ section:is(.duo, .trio, .band) > * { margin: 0; }
  * beside a title is. The heading level is how you say which line it is, not how
  * big it comes out.
  *
- * A plain paragraph still lands in the strip on the three that flow into it,
- * which is what every slide written before this did, and it still works.
+ * On `duo`, `trio` and `band` this rule only normalises the heading back to the
+ * running text, because on those three anything left in normal flow lands in the
+ * strip anyway — that is what the grid does with it, and a stray paragraph will
+ * still turn up there. On `comparison` and `board` the h2 is the only way in:
+ * the strip is placed absolutely, and a paragraph in flow falls into a column.
  */
 section:is(.duo, .trio, .band, .comparison, .board) > h2 {
-  font-size: var(--fs-body);
+  font-size: var(--fs-content-medium);
   font-weight: var(--fw-body);
   line-height: 1.44;
+  /*
+   * ...and the running text's line breaking, which is the fourth thing on that
+   * list and the one that is easy to forget. Headings are set `balance`, which
+   * evens the rows of a short title; run over three or four rows of body copy it
+   * just leaves the line narrower than the strip it sits in. `pretty` is what
+   * every other sentence in the theme gets, and it is what makes this line come
+   * out identical whether the strip is filled by an h2 or, on the three layouts
+   * that flow into it, by a paragraph.
+   */
+  text-wrap: pretty;
 }
 
 /*
@@ -1492,7 +1653,7 @@ section:is(.duo, .trio, .band, .image, .comparison, .board) h1 {
   right: auto;
   margin: 0;
   padding: 0;
-  font-size: var(--fs-title);
+  font-size: var(--fs-content-xxlarge);
 }
 
 section:is(.duo, .trio, .band, .image) {
@@ -1624,27 +1785,46 @@ section.image h1 {
 
 /* --- split -------------------------------------------------------- */
 /*
- * Half the slide black and half white, with a title and a paragraph on each
- * side. The first h1 falls on the black half.
+ * Half the slide black and half white, with a free field on each half.
  *
  *   <!-- _class: split -->
+ *
+ *   <div class="left">
  *
  *   # Before
  *
  *   What it used to be.
  *
+ *   </div>
+ *
+ *   <div class="right">
+ *
  *   # After
  *
  *   What it is now.
+ *
+ *   </div>
+ *
+ * The field is the same one `half`, `side` and `board` use — a half-slide
+ * column, full height, its contents stacked and centred — so each side takes a
+ * title, a paragraph, a list, a code panel, a picture or an inline SVG, at
+ * whatever length it needs.
+ *
+ * It used to place a bare `h1` and `p` into a two-by-two grid, first pair to
+ * the black half and second to the white, and that carried the layout for as
+ * long as a side could only hold a title and a line: a second paragraph on the
+ * left came out as the right-hand side's, because ORDER was the only thing
+ * saying which side a block was on. Saying it instead cost the grid, both
+ * `nth-of-type` rules and a `:not()` guard to keep the fields out of them, and
+ * bought a layout that holds anything. It also matches the rest of the theme,
+ * where content in the second half of a slide has always gone in a field.
+ *
+ * What is left is a black rectangle and two boxes that place themselves.
  */
 
 section.split {
-  padding: 20px 0 0;
   background: var(--white);
-  display: grid;
-  grid-template-columns: var(--half) var(--half);
-  grid-template-rows: auto auto;
-  align-content: center;
+  padding: 0;
   text-align: center;
 }
 
@@ -1658,51 +1838,69 @@ section.split::before {         /* the black half */
   background: var(--black);
 }
 
-section.split > * {
-  position: relative;
+/*
+ * The inset that keeps a line off the middle seam and off the outer edge — and
+ * the ink, which has to be said here and cannot be left to inheritance. The
+ * palette above redefines --fg ON the black field, but `color` was already
+ * computed on the section by then, so the field would inherit the section's
+ * black and set white-half ink on the black half: invisible. Reading --fg here
+ * re-resolves it inside the field, where it is the right one.
+ */
+section.split > :is(.left, .right) {
+  color: var(--fg);
   padding: 0 60px;
-}
-
-section.split h1 {
-  grid-row: 1;
   /*
-   * The one title in the theme that is neither at a measured position nor
-   * anchored to an edge: it is a row of a grid that is centred as a block, so
-   * both what is under it and the centring itself move when its box grows.
-   * Cancelling the added leading on the box — half off each edge — leaves the
-   * row exactly as tall as it was and the glyphs exactly where they were, and
-   * the line underneath never learns anything happened.
+   * Wider than a field's usual gap: this is the step between a title and the
+   * line under it, not the step between two blocks of running text.
    */
-  margin: calc(-1 * var(--title-half-leading)) 0;
-  font-size: var(--fs-title);
-  line-height: 1.2;
+  gap: var(--space-7);
 }
 
-section.split p {
-  grid-row: 2;
-  margin: var(--space-7) 0 0;
-  font-size: var(--fs-body);
+/*
+ * ...less the half-leading the title's box carries below its glyphs, the same
+ * correction every other title position in the theme takes. What the two
+ * together set is the distance from the bottom of the title's INK to the top of
+ * the first line of body ink, which is the thing the eye measures; the gap on
+ * its own overshoots it by exactly the 6 px sitting inside the bottom of the
+ * h1's line box.
+ */
+section.split > :is(.left, .right) > h1 {
+  margin-bottom: calc(-1 * var(--title-half-leading));
 }
-
-section.split h1:nth-of-type(1), section.split p:nth-of-type(1) { grid-column: 1; color: var(--white); }
-section.split h1:nth-of-type(2), section.split p:nth-of-type(2) { grid-column: 2; color: var(--black); }
 
 /*
  * `mirror` puts the shadow on the right. Which half is black is the one thing
  * about this layout that nothing in the markdown implies — both halves are just
- * a title and a line — so unlike `half`, it has to be said. The columns do not
- * move: the first thing you wrote stays the first thing on the left, and only
- * the ink and the paper trade places under it.
+ * a field — so unlike `half`, it has to be said. The fields do not move: the
+ * left field stays on the left, and only the ink and the paper trade places
+ * under it. The palette that comes with the black half is scoped further up.
  */
 section.split.mirror::before { left: auto; right: 0; }
-section.split.mirror h1:nth-of-type(1), section.split.mirror p:nth-of-type(1) { color: var(--black); }
-section.split.mirror h1:nth-of-type(2), section.split.mirror p:nth-of-type(2) { color: var(--white); }
 
 /* --- poster ------------------------------------------------------- */
 /*
- * A single large sentence, centred on both axes and staying centred as it
- * grows to two or three rows. Bold runs come out red. Add `dark` for the
- * black version.
+ * A single large statement, centred on both axes and staying centred as it
+ * grows to two or three rows. Add `dark` for the black version.
+ *
+ *   <!-- _class: poster -->
+ *
+ *   # Everything in its **place**
+ *
+ * The statement is a title, written `#` like every other title in the theme,
+ * and that is the whole of what this layout needs to be told. Anything else on
+ * the slide is ordinary content at the body size, so a poster can carry a line
+ * under its statement, or a list, without the two competing:
+ *
+ *   # Everything in its **place**
+ *
+ *   And the line underneath, at the size of any other line in the deck.
+ *
+ * It used to be a bare paragraph, with every block on the slide set at the
+ * display size — which meant a poster could hold exactly one, and nothing in
+ * the markup said which block was the statement. Marking it is what buys the
+ * second register, and it leaves almost nothing for this layout to declare: a
+ * title here is the ordinary `h1` at the ordinary title size, with its red bold
+ * and its centring already coming from the theme, and its rule already off.
  */
 
 /*
@@ -1716,22 +1914,33 @@ section.poster {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-6);
   text-align: center;
 }
 
-/* the 200 px side padding is what holds the line length; nothing else needs to */
-section.poster :is(h1, h2, p) {
-  margin: 0;
-  /*
-   * A line box reserves more room below the baseline than above the x-height,
-   * so centring it leaves the text sitting 9 px high. The top padding
-   * compensates without breaking the centring.
-   */
-  padding-top: 18px;
-  font-size: var(--fs-title);
-  font-weight: var(--fw-title);
-  line-height: 1.2;
-}
+/* the gap does the spacing, so the blocks carry no margins of their own */
+section.poster > * { margin: 0; }
+
+/*
+ * The 200 px side padding is what holds the statement's measure; body copy
+ * under it wants the same measure as body copy anywhere else, which is shorter.
+ */
+section.poster > :not(h1) { max-width: var(--body-width); }
+
+/*
+ * A line box reserves more room below the baseline than above the x-height, so
+ * centring it leaves the text sitting 9 px high. The top padding compensates
+ * without breaking the centring.
+ */
+section.poster h1 { padding-top: 18px; }
+
+/*
+ * A list is the exception to the centring. The box stays centred — the flex
+ * container shrink-wraps it — but the rows inside range left, because centred
+ * rows put the dashes at a different offset on every line and the column of
+ * markers that makes it read as a list disappears.
+ */
+section.poster > :is(ul, ol) { text-align: left; }
 
 /* at this size the 2px rule of a link is a hairline; the underline is set to
  * match the text instead. The colour is already the ink of the page. */
@@ -1800,7 +2009,7 @@ section.comparison h3 {
   break-after: avoid;
   align-content: end;
   height: 165px;
-  font-size: var(--fs-h2);
+  font-size: var(--fs-content-large);
   line-height: 1.204;
   margin: 0 0 80px;
 }
@@ -1870,8 +2079,8 @@ section:is(.comparison, .board).mirror h1 {
 
 /*
  * A line beside the title, the way `duo`, `trio` and `band` carry one: write a
- * paragraph after the h1 and it lands in the right half of the bottom strip,
- * level with the title. It takes the same strip those three use — the 868 px
+ * `## Like this` and it lands in the right half of the bottom strip, level with
+ * the title. It takes the same strip `duo`, `trio` and `band` use — the 868 px
  * line and the half mark — so a `comparison` and a `band` next to each other in
  * a deck put that line in the same place.
  *
@@ -1881,11 +2090,11 @@ section:is(.comparison, .board).mirror h1 {
  *
  *   ### Light
  *   …
- *   # Title
+ *   ## The line beside it.
  *
- *   The line beside it.
+ *   # Title
  */
-section.comparison > :is(h1 + p, h2),
+section.comparison > h2,
 section.board > h2 {
   position: absolute;
 
@@ -1898,7 +2107,7 @@ section.board > h2 {
   column-span: all;
 }
 
-section:is(.comparison, .board).mirror > :is(h1 + p, h2) {
+section:is(.comparison, .board).mirror > h2 {
   left: var(--margin-x);
   right: var(--half);
 }
@@ -1979,7 +2188,7 @@ section.agenda > ol > li {
   min-height: 136px;
   margin: 0;
   padding: 48px 0 0 136px;
-  font-size: var(--fs-h2);
+  font-size: var(--fs-content-large);
   line-height: 1.2;
 }
 
@@ -1989,7 +2198,7 @@ section.agenda > ol > li::before {    /* the gray numeral behind */
   position: absolute;
   left: 0;
   top: 0;
-  font-size: var(--fs-number);
+  font-size: var(--fs-symbol-xxsmall);
   font-weight: var(--fw-title);
   line-height: 1.05;
   color: var(--gray-light);
