@@ -589,6 +589,14 @@ an accent, the red — stays exactly what it says. `stroke` gets no such
 default on purpose: its initial value is `none`, and handing it a colour
 would draw outlines the diagram never asked for.
 
+A label inside a diagram is set apart the way a word is set apart anywhere
+else, by weight, and it takes the same name for it — `--fw-strong`, the bold
+of a sentence. A presentation attribute takes a `var()`, so it can read the
+theme's number instead of repeating it: `font-weight="var(--fw-strong)"` on a
+`<text>`, or on the `<g>` holding a whole plate of them. Sizes go the same
+way: `font-size="var(--fs-content-small)"` keeps an annotation on the scale
+rather than inventing a number beside it.
+
 Retune `--red` and the head of the ramp moves with it, which is the intent: the
 first colour of the series *is* the theme's accent rather than a copy of it. And
 `**bold**` in a heading stays red on a slide you have given an accent class — it
@@ -738,7 +746,8 @@ Montserrat is a variable font, so both are real weights rather than the
 browser's synthetic thickening, and 800 against 300 is a difference you can see
 from the back of the room. `--fw-strong` is kept as a separate name from
 `--fw-title` even though they land on the same number, so that retuning a bold
-run in a sentence does not drag every heading with it.
+run in a sentence does not drag every heading with it. It is also the weight a
+diagram asks for by hand, on the labels of an inline SVG — see above.
 
 A link is marked the same way — 800, in the ink of the page, with a rule under
 it to tell it from a plain bold run. It used to come out red, which put it in

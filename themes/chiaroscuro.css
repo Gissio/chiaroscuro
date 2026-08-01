@@ -328,10 +328,18 @@
    * Whatever the number, it marks a word and never a block. A row of a list is
    * a sentence like any other and takes the running weight, however large it is
    * set and whatever it stands next to.
+   *
+   * The lettering inside an inline SVG takes --fw-strong too, and it is the
+   * same job: a label picked out from the annotation beside it, drawn rather
+   * than written. A diagram has no markdown to hang a class on, but a
+   * presentation attribute takes a var() in current Chromium, so the weight
+   * goes straight on the <text> — or on the <g> holding a whole plate of them
+   * — as `font-weight="var(--fw-strong)"`, and the number stays written once,
+   * here. That is the only reach of a weight this file never applies itself.
    */
-  --fw-title: 800;        /* headings, table headers, display type */
   --fw-body: 300;         /* running text, everywhere, at every size */
-  --fw-strong: 800;       /* `**strong**` in body copy, and nothing else */
+  --fw-title: 800;        /* headings, table headers, display type */
+  --fw-strong: 800;       /* `**strong**` in body copy, and the labels of an inline SVG */
 
   /*
    * --- Spacing ----------------------------------------------------------
