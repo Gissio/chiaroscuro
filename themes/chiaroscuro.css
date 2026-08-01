@@ -357,6 +357,40 @@
   --space-7: 48px;
 
   /*
+   * --- Line weight ---------------------------------------------------------
+   *
+   * How thick a line is drawn in a diagram. Six steps: 1 2 3 4 6 8.
+   *
+   * Nothing in this file strokes anything, so like the five --accent-N these
+   * are published rather than consumed — a vocabulary for the person drawing a
+   * figure, not a device of the theme's. A presentation attribute takes a
+   * var() in current Chromium, so a diagram reads them the same way it reads a
+   * weight or a size: stroke-width="var(--sw-medium)" on a <path>, or on the
+   * <g> holding a whole plate.
+   *
+   * The rhythm is the symbol family's. From 2 up, the ratio between neighbours
+   * alternates 3:2 and 4:3 and every second step is a doubling — 2·4·8 and
+   * 3·6, two doubling series interleaved. The names therefore sit where they
+   * sit in that family, with `medium` fourth of six. The 1 hangs below as a
+   * hairline, which is a case apart: it is the lightest line that still draws
+   * at all, and no ratio argument reaches it.
+   *
+   * The caveat, and it is the reason this scale cannot promise what --fs-*
+   * promises: a stroke-width is in the user units of its own viewBox, not in
+   * pixels. The steps look alike across a deck only while the figures share a
+   * scale — 840 units into a ~960px field and 1560 into ~1775 are both about
+   * 1.14 — and a figure drawn on a much smaller viewBox renders the same step
+   * proportionally thicker. Set a new viewBox beside an old figure and compare
+   * before trusting the name.
+   */
+  --sw-xxsmall: 1;        /* a hairline: a grid that must not read as content */
+  --sw-xsmall:  2;        /* rules and dashed guides */
+  --sw-small:   3;        /* between a guide and a drawn box */
+  --sw-medium:  4;        /* the default: axes, boxes, plotted curves */
+  --sw-large:   6;        /* emphasis: the one line the figure is about */
+  --sw-xlarge:  8;        /* the heaviest step */
+
+  /*
    * The list marker: an en dash, the same in every layout, and this is the one
    * place to change it. It reaches unordered items only — see the ::marker
    * rule. It was `normal` — the browser's own disc — with `side` and
@@ -390,8 +424,20 @@
  * Which half is black flips with `mirror`, hence the two arms — and the first
  * has to exclude `mirror`, or a mirrored slide would match both and take the
  * inverted values on both sides.
+ *
+ * Which is also why `split` is held out of the first arm. `dark` on a layout
+ * that is already half dark has nothing left to invert, and taken literally it
+ * broke the light half twice over: the paper stayed white — `split` paints it
+ * itself — while the ink and the code chip went dark, so the whole right-hand
+ * side came out white on white with one black chip floating in it. The halves
+ * say what colour they are; a slide-wide inversion cannot also say it.
+ *
+ * The exclusion is wrapped in `:where()` because `:not()` would carry the
+ * weight of a class: this rule and the --gray override for a photograph below
+ * are the same specificity and settled by order, and one extra class here would
+ * quietly take the photo gray away from `cover` and `image`.
  */
-section:is(.dark, .cover, .question, .image),
+section:is(.dark, .cover, .question, .image):where(:not(.split)),
 section.split:not(.mirror) > .left,
 section.split.mirror       > .right {
   --bg: var(--black);
@@ -427,8 +473,8 @@ section:is(.cover, .image) { --gray: var(--gray-photo); }
  * accent comes back a lighter shade of itself, which is what black wants
  * anyway. Photographs are unaffected — the selector only matches SVG.
  */
-section:is(.dark, .cover, .question, .image) img[src$=".svg" i],
-section:is(.dark, .cover, .question, .image) img[src^="data:image/svg"],
+section:is(.dark, .cover, .question, .image):where(:not(.split)) img[src$=".svg" i],
+section:is(.dark, .cover, .question, .image):where(:not(.split)) img[src^="data:image/svg"],
 section.split:not(.mirror) > .left  :is(img[src$=".svg" i], img[src^="data:image/svg"]),
 section.split.mirror       > .right :is(img[src$=".svg" i], img[src^="data:image/svg"]) {
   /* the black half of a split, same reasoning as the four layouts above */

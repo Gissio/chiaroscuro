@@ -139,6 +139,10 @@ marp example.md --pdf -o example.pdf
 - **SVG diagrams adapt to the ground.** Draw a figure once, in the light
   palette; on the black layouts the theme inverts it and turns the hues back
   around, so one file serves both grounds.
+- **Six line weights for your own diagrams.** A `--sw-*` scale beside the type
+  and colour ones, read straight from a shape — `stroke-width="var(--sw-medium)"`
+  — so a drawing is set on the theme's steps rather than on numbers invented
+  beside it. As with the accents, no rule in the theme reads them.
 - **Montserrat is embedded in the CSS.** Composing and exporting need neither
   an internet connection nor installed fonts; the HTML and PDF you export are
   self-contained.

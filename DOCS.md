@@ -275,6 +275,10 @@ panel and the dark syntax colours, a table gets the light rule, an SVG is
 inverted. `mirror` moves the black half to the right and the ink follows; the
 fields do not move.
 
+`dark` does nothing here, and that is deliberate: this is the one layout that
+carries both grounds already, and there is no slide-wide inversion that would
+leave its light half readable. To swap the sides, reach for `mirror`.
+
 **`poster`** — a single large statement, centred on both axes, staying centred as
 it grows to two or three rows. Add `dark` for the black version.
 
@@ -368,7 +372,7 @@ Combine with any layout, in the same directive:
 
 | Modifier | Effect |
 | --- | --- |
-| `dark` | Inverts the slide to black: text, table rules, list markers, code, pagination, footer. |
+| `dark` | Inverts the slide to black: text, table rules, list markers, code, pagination, footer. `split` ignores it. |
 | `mirror` | Puts the title, its rule and the body on the other side. |
 | `centered` | Centres the content, red rule included. |
 | `no-rule` | Drops the red rule under the title. |
@@ -578,6 +582,12 @@ nothing warns you. The classes above need no such setting.
 html: true
 ```
 
+**An inline `<svg>` needs `html: true` as well, and it fails more loudly than a
+dropped `style`.** Marp's default allowlist does not merely strip the element's
+attributes — it escapes the whole tag, so the figure renders as its own source
+code across the middle of the slide. Everything in the rest of this section
+assumes that setting.
+
 Inside an inline `<svg>`, the page's ink is the default. SVG's own initial
 fill is black — not the ink, which is what an unfilled `<text>` or shape
 plainly means — so on the black layouts every label left unfilled simply
@@ -612,6 +622,35 @@ black layouts included. What that does not buy is distance inside the family: to
 red-green colour-blindness the purple, the violet and the blue are nearly one
 colour. That is what taking from the ends is for — 1 against 5 stays far apart
 to every eye.
+
+### Line weights in a diagram
+
+How thick a line is drawn has a scale too, `--sw-*`, and it is read the same way
+— `stroke-width="var(--sw-medium)"` on a `<path>`, a `<rect>` or the `<g>` over
+a whole plate. Like the colour series, **no rule in the theme strokes anything**:
+these are published for what you draw, not used by what the theme draws.
+
+| Step | Width | What it is for |
+| --- | ---: | --- |
+| `--sw-xxsmall` | 1 | a hairline: a grid that must not read as content |
+| `--sw-xsmall` | 2 | rules and dashed guides |
+| `--sw-small` | 3 | between a guide and a drawn box |
+| `--sw-medium` | 4 | the default: axes, boxes, plotted curves |
+| `--sw-large` | 6 | emphasis: the one line the figure is about |
+| `--sw-xlarge` | 8 | the heaviest step |
+
+The six hold the symbol family's rhythm: from 2 up the ratio alternates 3:2 and
+4:3 and every second step is a doubling — 2·4·8 and 3·6 — which is why `medium`
+is the fourth of six here rather than the third. The 1 hangs below as a
+hairline, a case apart: it is the lightest line that still draws, and no ratio
+argument reaches it.
+
+**One thing this scale cannot promise that `--fs-*` can.** A stroke width is in
+the user units of its own `viewBox`, not in pixels, so the same step is only the
+same line while your figures share a scale — 840 units into a ~960 px field and
+1560 into ~1775 both come out near 1.14. Draw one on a much smaller `viewBox`
+and `--sw-medium` renders proportionally thicker there. Put a new figure beside
+an old one and compare before trusting the name.
 
 ### Diagrams in an `.svg` file
 
