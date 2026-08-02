@@ -27,41 +27,43 @@ SLIDES = {
     "question": 3,
     "poster": 4,
     "default": 5,
-    "columns": 6,
-    "series": 7,
-    "maths": 8,
-    "half": 9,
-    "half-field": 10,
-    "half-glyphs": 11,
-    "half-mirrored": 12,
-    "side": 13,
-    "duo": 14,
-    "trio": 15,
-    "band": 16,
+    "indent": 6,
+    "columns": 7,
+    "series": 8,
+    "scale": 9,
+    "half": 10,
+    "half-field": 11,
+    "half-glyphs": 12,
+    "half-mirrored": 13,
+    "side": 14,
+    "board": 15,
+    "board-photo": 16,
     "image": 17,
-    "comparison": 18,
-    "comparison-mirror": 19,
-    "board": 20,
-    "dark": 21,
-    "split": 22,
-    "poster-dark": 23,
+    "duo": 18,
+    "trio": 19,
+    "comparison": 20,
+    "comparison-mirror": 21,
+    "dark": 22,
+    "split": 23,
+    "poster-dark": 24,
 }
 
 # name -> (slide, width): rendered alone, scaled to the given width.
 SINGLES = {
     "hero": ("cover", 1920),
     "series": ("series", 1440),
+    "scale": ("scale", 1440),
 }
 
 # name -> three slides, left to right, matching the README captions.
 ROWS = {
-    "layouts-row-1": ["default", "cover", "question"],
-    "layouts-row-2": ["half", "side", "duo"],
-    "layouts-row-3": ["trio", "band", "image"],
-    "layouts-row-4": ["split", "poster", "comparison"],
-    "layouts-row-5": ["board", "agenda", "poster-dark"],
-    "modifiers-row-1": ["dark", "half-mirrored", "columns"],
-    "modifiers-row-2": ["comparison-mirror", "half-field", "half-glyphs"],
+    "layouts-row-1": ["agenda", "poster", "question"],
+    "layouts-row-2": ["default", "indent", "half"],
+    "layouts-row-3": ["side", "duo", "trio"],
+    "layouts-row-4": ["board", "board-photo", "image"],
+    "layouts-row-5": ["split", "comparison", "poster-dark"],
+    "modifiers-row-1": ["dark", "columns", "comparison-mirror"],
+    "modifiers-row-2": ["half-mirrored", "half-field", "half-glyphs"],
 }
 
 TILE = (640, 360)  # one thumbnail in a row
@@ -81,8 +83,9 @@ def render_deck(tmp: Path) -> dict[str, Path]:
         cwd=ROOT, check=True,
     )
     rendered = sorted(tmp.glob("slide.*.png"))
-    if len(rendered) < max(SLIDES.values()):
-        sys.exit(f"expected {max(SLIDES.values())} slides, marp produced {len(rendered)}")
+    if len(rendered) != max(SLIDES.values()):
+        sys.exit(f"SLIDES maps {max(SLIDES.values())} slides, marp produced "
+                 f"{len(rendered)} — the map is stale")
     return {name: rendered[n - 1] for name, n in SLIDES.items()}
 
 

@@ -60,7 +60,7 @@ paginate: true
 <!-- _class: cover -->
 <!-- _paginate: false -->
 
-![bg opacity:.4](photo.jpg)
+![bg opacity:.4 saturate:0](photo.jpg)
 
 # Title
 
@@ -72,7 +72,15 @@ Author
 # An ordinary slide
 
 The title starts at the left margin with its red rule bleeding off the edge,
-and the body hangs to the right of it.
+and the body runs under it, margin to margin — the same extent the free field
+of `board` gets. It is the **document page**: content flows from the top, and
+running text on it goes brief — a line or two before each equation, listing or
+table. Sustained prose belongs on `half`, and `indent` hangs the body off the
+title instead.
+
+Every title in the theme is anchored by its **bottom edge**: a title that
+wraps grows upwards, and the red rule and the body under it stay exactly
+where they were. That is why titles everywhere are short by design.
 ```
 
 Pick a layout per slide with a Marp class directive, `<!-- _class: name -->`.
@@ -93,20 +101,20 @@ get the fallback described above.
 
 | Class | What it is |
 | --- | --- |
-| *(none)* | The everyday slide: title with its rule, body indented past it. |
+| *(none)* | The document page: content flows from the top — brief texts, then equations, listings and tables at the full measure. |
+| `indent` | The everyday slide with the body hung off the title — a quarter of the measure given away. |
 | `cover` | Full-bleed photo over black, title in caps, rule, credits. |
 | `question` | A white band with the question, black below, a giant "?". |
 | `half` | Title and body on the left half, the right half free for a photo. |
 | `side` | Like `half`, with the whole block dropped to the middle of the page. |
 | `duo` | Two photos with a rule and a caption each. |
 | `trio` | Three photos in a row, each with its rule and caption. |
-| `band` | A full-bleed band of image across the top. |
 | `image` | One photo covering the slide, with an optional title. |
 | `split` | Half black, half white, with a free field on each half. |
 | `poster` | One large statement, centred and staying centred as it grows. |
 | `comparison` | N columns hanging from a full-bleed line, a dot each. |
-| `board` | One free field across the top, with the title of `comparison`. |
-| `agenda` | Red title and a numbered list set against big grey numerals. |
+| `board` | One free field across the top — or a full-bleed photograph — with the title of `comparison`. |
+| `agenda` | A numbered list set against big grey numerals with red dashes. |
 
 A talk usually opens on `cover`, sets out its shape with `agenda`, and then
 alternates: stretches of ordinary slides broken up by a `question` or a
@@ -123,8 +131,8 @@ without one the slide is black. Choose the dimming to suit the photo.
 <!-- _class: cover -->
 <!-- _footer: photo credit -->
 
-![bg opacity:.4](photo.jpg)   <!-- a light photo: dim it -->
-![bg](dark-photo.jpg)         <!-- already dark: leave it -->
+![bg opacity:.4 saturate:0](photo.jpg)   <!-- a light photo: dim and desaturate it -->
+![bg saturate:0](dark-photo.jpg)         <!-- already dark: just desaturate -->
 
 # Title
 
@@ -141,11 +149,15 @@ Author
 # What is a<br>**data structure**?
 ```
 
-Two rows come out centred in the white band, and the title is anchored by its
-bottom edge: a one-row question lands where the second row of a two-row one
-would, as if the first row were blank. The "?" is centred in the black band,
-both ways: on the right half of the slide, and — measured to its ink, not its
-box — on the height of the band.
+The title takes exactly the everyday slide's anchor — same left margin, same
+bottom edge — so a one-row question sits precisely where an ordinary title
+does, and a second row grows upwards, the way every title in the theme does:
+a question and an ordinary slide in sequence hold their title still. The
+white band is sized so a two-row title sits centred in it, the same air above
+and below; a one-row question keeps the extra white above, where the first
+row would have gone. The "?" is centred in the black band, both ways: on the
+right half of the slide, and — measured to its ink, not its box — on the
+height of the band.
 
 **`half`** and **`side`** — the same layout at two heights; `side` sits lower
 down the page. The photo on the right goes in as a
@@ -197,9 +209,9 @@ field with the type helpers rather than reaching for CSS:
 </div>
 ```
 
-**`duo`**, **`trio`** and **`band`** share one footing: photos pinned across the
+**`duo`** and **`trio`** share one footing: photos pinned across the
 top, and a band across the bottom carrying the title on the left and the running
-text on the right half. That band is the same strip on all three, and the text
+text on the right half. That band is the same strip on both, and the text
 hangs from a fixed line inside it, so the first row lands in the same place
 whichever layout you are on and however long the text runs — three slides in a
 row do not jitter. Four rows is the practical maximum; past that the text
@@ -224,12 +236,12 @@ The running text, however many paragraphs it runs to.
 
 `trio` takes three photos, or two to six with `columns-2` … `columns-6` — the
 photographs and their rules are rescaled to match, though past four they are
-smaller than their own captions. `band` takes one image, or up to four with
-`columns-2` … `columns-4`, sharing the band edge to edge with no gutter; it has
-no captions.
+smaller than their own captions. For a photograph with no caption at all — a
+full-bleed band across the top — hand it to `board`, which is what that layout
+does with one; see below.
 
 **`image`** — one photo covering the slide, centred, undistorted, cropped to
-fit. Like `cover`, `half`, `side` and `band`, it takes a credit line in the top
+fit. Like `cover`, `half`, `side` and `board`, it takes a credit line in the top
 right corner — see *Crediting a photograph* below. The photo is never veiled or dimmed: a title comes out bottom left carrying
 its own soft shadow, which lifts it off a busy picture without touching the
 picture itself.
@@ -304,7 +316,7 @@ And the line underneath, at the size of any other line in the deck.
 
 **`comparison`** — one `h3` per column, then its text and list; the `h1` goes
 last and lands at the bottom left, or bottom right with `mirror`. An `h2` lands
-beside it, in the same bottom strip `duo`, `trio` and `band` use, so a subtitle
+beside it, in the same bottom strip `duo` and `trio` use, so a subtitle
 sits in the same place whichever of the four you are on — and here, where the
 strip is placed and the columns are in flow, `##` is the only way to reach it.
 The row of column headings starts on the same line as the title of an
@@ -340,9 +352,7 @@ A line about it.
 `comparison` under it, at the bottom left. Nothing inside the field is placed
 for you: whatever the slide carries is stacked and centred on both axes, so it
 takes a table, a diagram, a code block, an inline SVG or one big glyph as
-readily as a paragraph. It is the free field of `half` grown to the full width,
-and it is centred in exactly the rectangle a full-bleed image fills on `band` —
-so a diagram on one slide and a photograph on the next sit on one centre line.
+readily as a paragraph. It is the free field of `half` grown to the full width.
 
 ```markdown
 <!-- _class: board -->
@@ -357,14 +367,48 @@ An optional line about it.
 ```
 
 Every edge of the field is borrowed rather than invented: the sides sit on the
-left margin of `half` and its mirror on the right, and the top and bottom on the
-band of photograph of `band`. Reach for it when what you want to show is one
-thing, wide, and the running text is a caption to it. Here too a table keeps the
-width of its own contents — add `wide` to the directive, or wrap the table in
-`<div class="wide">`, when it should span the field.
+left margin of `half` and its mirror on the right, and the top and bottom on
+the band a full-bleed photograph fills. Reach for it when what you want to
+show is one thing, wide, and the running text is a caption to it. Here too a
+table keeps the width of its own contents — add `wide` to the directive, or
+wrap the table in `<div class="wide">`, when it should span the field.
+
+**Handed a photograph, the field becomes a full-bleed band.** A **raster**
+image — a `.jpg`, a `.png` — is a photograph: it is pinned across the top,
+edge to edge and cropped to fit, filling exactly the rectangle the field
+centres everything else in, so a diagram on one slide and a photograph on the
+next sit on one centre line. An `.svg` image is a diagram and stays in the
+field, centred and undistorted — the theme already asks for diagrams as SVG,
+and this is where that pays. One photograph by default, `columns-2` …
+`columns-4` to share the band edge to edge with no gutter; there are no
+captions, and the line beside the title is said with `##` as always. Like the
+other photo layouts it takes a credit in the top right corner — see
+*Crediting a photograph*.
+
+```markdown
+<!-- _class: board -->
+<!-- _footer: photo credit -->
+
+## The line beside the title.
+
+![](photo.jpg)
+
+# Title
+```
 
 **`agenda`** — an `h1` and an ordered list. The theme draws the grey numerals
-and the red dashes.
+and the red dashes. The title is in the ink like every other; write it
+`# **Contents**` when you want it red, the way bold picks a heading's word out
+in red anywhere.
+
+**`indent`** — the everyday slide with the body hung off the title: a quarter
+of the measure given away on the left, the three quarters left closing against
+the right margin. Everything else is the everyday slide — same title, same
+rule, same helpers; `columns-N` runs its columns inside the indented measure,
+and `mirror` hangs the body off the other side. For one block of an ordinary
+slide rather than a whole slide, wrap it in `<div class="indent">` — the block
+form of the same indent, which is exactly why the two do not nest: on an
+`indent` slide the block would be pushed twice.
 
 ## Modifiers
 
@@ -374,10 +418,10 @@ Combine with any layout, in the same directive:
 | --- | --- |
 | `dark` | Inverts the slide to black: text, table rules, list markers, code, pagination, footer. `split` ignores it. |
 | `mirror` | Puts the title, its rule and the body on the other side. |
-| `centered` | Centres the content, red rule included. |
+| `centered` | Centres the content, red rule included. Both routes: the directive centres the slide, `<div class="centered">` one block. |
 | `no-rule` | Drops the red rule under the title. |
-| `no-indent` | Pulls the body back to the margin, out from behind the title. |
-| `columns-2` … `columns-6` | How many of whatever the layout counts. |
+| `justify` | Sets running text flush on both edges — paragraphs, list rows and quotes, never a heading. Both routes, like the size helpers. |
+| `columns-1` … `columns-6` | How many of whatever the layout counts; `columns-1` is the way back to one after a deck-wide `class:` said otherwise. |
 | `debug` | Draws the box every element got, and lets overflow show. Not for a finished deck. |
 
 ### Which side things are on
@@ -410,8 +454,9 @@ Body text.
 The free field has no such mark, so there you say it: `<div class="left">` is
 the mirror of `<div class="right">`, and it carries the title with it.
 
-**Otherwise, `mirror`.** On the everyday slide it moves the title, the rule and
-the indent all at once. On `comparison` and `board` it takes the title to the
+**Otherwise, `mirror`.** On the everyday slide it moves the title and the rule
+— and the indent with them, if the slide carries `indent`. On `comparison` and
+`board` it takes the title to the
 bottom right, which is where the reading finishes on those two — the line across
 the top, then the columns left to right — so it is the one they most often want.
 On `split` it means something else again: the black half moves to the right, and
@@ -425,6 +470,21 @@ on the left, and only the ink and the paper trade places.
 `centered`, `poster` and `split`'s two titles are centred and have no side to be
 on, so `mirror` leaves them alone.
 
+`justify` is the fourth way text can range, and it is about the sentence
+rather than the slide: it sets paragraphs, list rows and quotes flush on both
+edges and never touches a heading, since stretching a short title to the
+measure opens holes you cannot close. Which is also the caution about the
+rest: at the full measure it reads well, but narrow the column with
+`columns-3` or more and the word spaces stretch far enough to leave rivers
+down the page. It asks the browser to hyphenate, which only happens if the
+deck says what language it is in — set `lang` in your marp-cli config
+(`lang: es`), or the request is silently ignored.
+
+```markdown
+<!-- _class: justify -->
+<div class="justify">
+```
+
 `columns-N` is one modifier, not four: it says how many of something a slide
 has, and each layout takes it to mean the thing it counts.
 
@@ -433,7 +493,11 @@ has, and each layout takes it to mean the thing it counts.
 | *(the everyday slide)* | Text columns, with the title spanning them. |
 | `comparison` | Text columns. Two by default. |
 | `trio` | Photographs in the row. Three by default; past four they get small. |
-| `band` | Panels sharing the strip, edge to edge, no gutter. One by default. |
+| `board` | Photo panels sharing the band, edge to edge, no gutter. One by default. |
+
+Where a text column ends is the browser's to balance — except when you say
+it: wrap a block in `<div class="break">` and it opens the next column; an
+empty `<div class="break"></div>` does the same for whatever follows it.
 
 ### Text helpers
 
@@ -488,7 +552,8 @@ int main() { return 0; }
 One more helper is width rather than size: **`.wide`** stretches a table to the
 full measure of whatever holds it — the free field of `half` and `board`, or
 the text column of the everyday slide. Everywhere, a table otherwise sits at
-the width of its own contents. It reaches the table the same way the sizes do,
+the width of its own contents — ranged left, or centred on the axis a
+displayed equation takes by wrapping it in `<div class="centered">`. It reaches the table the same way the sizes do,
 through a variable (`--table-width`), and takes the same two routes: the class
 directive for every table on the slide, the `div` for one.
 
@@ -727,23 +792,24 @@ The eyebrow is placed rather than flowed, and that is the point of it: **it does
 not move the title**. A slide with an eyebrow and a slide without put their
 title, and the red rule under it, on exactly the same line — which matters,
 because the rule is the one thing on the page an audience notices moving. It
-sits centred in the space above the title and follows it across under `mirror`.
+sits with the same air above its capitals — up to the top edge of the slide —
+as below them, down to the title, and follows the title across under `mirror`.
 
 It goes above the title on **every layout**, not only the ones that keep the
-title at the top. On the eight that put it lower — `half`, `side`, `duo`,
-`trio`, `band`, `image`, `comparison` and `board` — it is placed against the
+title at the top. On the seven that put it lower — `half`, `side`, `duo`,
+`trio`, `image`, `comparison` and `board` — it is placed against the
 title itself rather than left at the top of the slide, where it would be in the
 opposite corner from the thing it labels. Write it the same way everywhere.
 
-One limit worth knowing: on the four whose title grows *upwards* from a fixed
-bottom edge — `half`, `side`, `comparison`, `board` — the eyebrow is placed one
-title-line above that edge, so **a two-line title on those four will reach its
-eyebrow**. Their titles are short by design; if you need both, shorten the title.
+One limit worth knowing: every title grows *upwards* from a fixed bottom
+edge, and the eyebrow is placed one title-line above that edge, so **a
+two-line title will reach its eyebrow** — on any layout. Titles are short by
+design; if you need both, shorten the title.
 
 ### The line beside the title
 
-Five layouts carry a sentence in the bottom strip, level with the title and
-reading as its subtitle: `duo`, `trio`, `band`, `comparison` and `board`. It is
+Four layouts carry a sentence in the bottom strip, level with the title and
+reading as its subtitle: `duo`, `trio`, `comparison` and `board`. It is
 a second-level heading, and that is the whole convention — the title is `#` and
 the line under it is `##`:
 
@@ -763,12 +829,12 @@ the line under it is `##`:
 # Title
 ```
 
-Where you write it in the file does not matter, on any of the five. It is a
+Where you write it in the file does not matter, on any of the four. It is a
 **subtitle by position, not by type**: in the strip it takes the size, the
 weight and the leading of running text, and its `**bold**` is the body's bold —
 a weight, not the red a bold run takes inside a real title.
 
-On `duo`, `trio` and `band` a plain paragraph still lands in the strip too,
+On `duo` and `trio` a plain paragraph still lands in the strip too,
 which is what those layouts always did; `##` is the way to say it out loud, and
 the only way to say it on `comparison` and `board`.
 
@@ -888,7 +954,8 @@ A displayed equation (`$$…$$`) gets more air above and below it than a paragra
 does, on either engine: it is a block the eye stops on, and at the paragraph gap
 it read as one more line of the paragraph it had just interrupted. The theme
 zeroes what each engine puts there and spaces the two identically, so a slide
-looks the same whichever one built it.
+looks the same whichever one built it. Maths set inline (`$…$`) stays inside
+the line and does not open it.
 
 `--font-math` is therefore a **KaTeX-only** knob. It ships as Times New Roman.
 KaTeX names its own faces on every span it writes, so the theme has to reach the

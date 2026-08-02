@@ -19,37 +19,39 @@ assets/placeholder.jpg   the filler photo the example uses
 ## Fourteen layouts
 
 One class directive per slide — `<!-- _class: name -->` — and nothing else to
-write. Left to right; each is described in
-[the documentation](DOCS.md#layouts).
+write. Left to right — `cover` is the photograph at the top of this page; each
+is described in [the documentation](DOCS.md#layouts).
 
-![The everyday slide, cover and question](assets/screenshots/layouts-row-1.jpg)
+![agenda, poster and question](assets/screenshots/layouts-row-1.jpg)
 
-<p align="center"><sub><i>(none)</i> — the everyday slide ·
-<code>cover</code> — full-bleed photo over black ·
+<p align="center"><sub><code>agenda</code> —
+a numbered list against grey numerals ·
+<code>poster</code> — one large sentence, centred ·
 <code>question</code> — a white band, and a giant "?" in the black</sub></p>
 
-![half, side and duo](assets/screenshots/layouts-row-2.jpg)
+![the everyday slide, indent and half](assets/screenshots/layouts-row-2.jpg)
 
-<p align="center"><sub><code>half</code> — text left, photo right ·
-<code>side</code> — <code>half</code>, dropped to the middle ·
-<code>duo</code> — two photos, a rule and a caption each</sub></p>
+<p align="center"><sub><i>(none)</i> — the everyday slide ·
+<code>indent</code> — the body hung off the title ·
+<code>half</code> — text left, photo right</sub></p>
 
-![trio, band and image](assets/screenshots/layouts-row-3.jpg)
+![side, duo and trio](assets/screenshots/layouts-row-3.jpg)
 
-<p align="center"><sub><code>trio</code> — three in a row, or two to six ·
-<code>band</code> — a full-bleed band of image ·
-<code>image</code> — one photo covering the slide</sub></p>
+<p align="center"><sub><code>side</code> —
+<code>half</code>, dropped to the middle ·
+<code>duo</code> — two photos, a rule and a caption each ·
+<code>trio</code> — three in a row, or two to six</sub></p>
 
-![split, poster and comparison](assets/screenshots/layouts-row-4.jpg)
-
-<p align="center"><sub><code>split</code> — half black, half white ·
-<code>poster</code> — one large sentence, centred ·
-<code>comparison</code> — columns hanging from a line</sub></p>
-
-![board, agenda, and poster in dark](assets/screenshots/layouts-row-5.jpg)
+![the free field, a photograph on board, and image](assets/screenshots/layouts-row-4.jpg)
 
 <p align="center"><sub><code>board</code> — one free field across the top ·
-<code>agenda</code> — a numbered list against grey numerals ·
+<code>board</code> — a photograph becomes a full-bleed band ·
+<code>image</code> — one photo covering the slide</sub></p>
+
+![split, comparison, and poster in dark](assets/screenshots/layouts-row-5.jpg)
+
+<p align="center"><sub><code>split</code> — half black, half white ·
+<code>comparison</code> — columns hanging from a line ·
 <code>poster dark</code> — and black, to close</sub></p>
 
 ## Modifiers
@@ -57,17 +59,17 @@ write. Left to right; each is described in
 Space-separated in the same directive — `<!-- _class: half dark -->`. `dark`
 turns any layout black; `mirror` moves the title to the other side; `columns-N`
 counts whatever the layout counts. The rest — `centered`, `no-rule`,
-`no-indent`, the type helpers — are in [the documentation](DOCS.md#modifiers).
+`justify`, the type helpers — are in [the documentation](DOCS.md#modifiers).
 
-![dark, a mirrored half, and columns](assets/screenshots/modifiers-row-1.jpg)
+![dark, columns, and a mirrored four-column comparison](assets/screenshots/modifiers-row-1.jpg)
 
 <p align="center"><sub><code>dark</code> — any layout, turned black ·
-<code>![bg left]</code> — the photo implies the side ·
-<code>columns-2</code> — text columns on the everyday slide</sub></p>
+<code>columns-2</code> — text columns on the everyday slide ·
+<code>comparison columns-4 mirror</code></sub></p>
 
-![comparison mirrored, the free field with code, and one large glyph](assets/screenshots/modifiers-row-2.jpg)
+![a mirrored half, the free field with code, and one large glyph](assets/screenshots/modifiers-row-2.jpg)
 
-<p align="center"><sub><code>comparison columns-4 mirror</code> ·
+<p align="center"><sub><code>![bg left]</code> — the photo implies the side ·
 <code>&lt;div class="right"&gt;</code> — the free field takes code ·
 <code>.symbol .pale</code> — the subject as the illustration</sub></p>
 
@@ -81,6 +83,7 @@ register it with the tool you use:
   ```yaml
   themeSet: ./themes
   allowLocalFiles: true
+  html: true
   ```
 
   or point at the file directly: `marp deck.md --theme themes/chiaroscuro.css`.
@@ -88,8 +91,15 @@ register it with the tool you use:
 - **Marp for VS Code** — in `.vscode/settings.json`:
 
   ```json
-  { "markdown.marp.themes": ["./themes/chiaroscuro.css"] }
+  {
+    "markdown.marp.themes": ["./themes/chiaroscuro.css"],
+    "markdown.marp.html": "all"
+  }
   ```
+
+`html` is what lets an inline `<svg>` or a `style` attribute past Marp's
+allowlist — without it a figure renders as its own source code across the
+slide, and a `style` is dropped with no warning at all.
 
 If a render comes out in Segoe UI with blue headings on a small canvas, the
 theme silently failed to register — [the documentation](DOCS.md#install) walks
@@ -107,7 +117,7 @@ paginate: true
 <!-- _class: cover -->
 <!-- _paginate: false -->
 
-![bg opacity:.4](photo.jpg)
+![bg opacity:.4 saturate:0](photo.jpg)
 
 # Title
 
@@ -119,7 +129,7 @@ Author
 # An ordinary slide
 
 The title starts at the left margin with its red rule bleeding off the edge,
-and the body hangs to the right of it.
+and the body runs under it, margin to margin.
 ```
 
 Or render the example deck — one slide per layout — from the repository root:
@@ -143,6 +153,8 @@ marp example.md --pdf -o example.pdf
   and colour ones, read straight from a shape — `stroke-width="var(--sw-medium)"`
   — so a drawing is set on the theme's steps rather than on numbers invented
   beside it. As with the accents, no rule in the theme reads them.
+
+  ![The scale: the six content sizes on the left, the six line weights drawn on the right](assets/screenshots/scale.jpg)
 - **Montserrat is embedded in the CSS.** Composing and exporting need neither
   an internet connection nor installed fonts; the HTML and PDF you export are
   self-contained.

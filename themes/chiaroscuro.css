@@ -19,14 +19,15 @@
  *
  *   <!-- _class: cover -->
  *
- * Layouts    cover · question · half · side · duo · trio · band ·
- *            image · split · poster · comparison · board · agenda
- * Modifiers  dark · mirror · centered · no-rule · no-indent ·
- *            columns-2 … columns-6 · debug
+ * Layouts    cover · question · half · side · duo · trio · image ·
+ *            split · poster · comparison · board · agenda · indent
+ * Modifiers  dark · mirror · centered · no-rule · justify ·
+ *            columns-1 … columns-6 · debug
  * Text       .xsmall .small .medium .large .xlarge .xxlarge
  *            .symbol-xxsmall .symbol-xsmall .symbol-small .symbol
  *            .symbol-large .symbol-xlarge
  *            .red .gray .pale .light
+ * Blocks     .wide · .accent-1 … .accent-5 · .break (div only)
  *
  * Everything a layout can change is a variable, declared in `:root` and reset
  * on the layout that departs from it — one palette, one type scale, one spacing
@@ -133,17 +134,28 @@
   /* --- Grid ------------------------------------------------------------- */
   --margin-x: 136px;
   --margin-y: 70px;
-  --indent: 368px;        /* body text hangs off the title, starting at x=504 */
-  --body-width: 1217px;
+  /*
+   * The measure between the two side margins, and the two divisions the theme
+   * makes of it. Both give a share away on the left and close what is left
+   * against the right margin; they differ in how much, because they are doing
+   * different things with it. `indent` gives away a quarter — enough for the
+   * body to read as hanging off the title, not so much that a paragraph runs
+   * short. `agenda` gives away a third, because what stands in that space is
+   * a 128px numeral and not the white behind a title.
+   */
+  --content-width: calc(1920px - 2 * var(--margin-x));   /* 1648px */
+  --indent: calc(var(--content-width) / 4);              /* the quarter given away */
+  --body-width: calc(var(--content-width) * 3 / 4);      /* and the three kept */
+  --agenda-indent: calc(var(--content-width) / 3);       /* the agenda's own third */
   --half: 960px;
 
   /*
    * Where the bottom strip begins: the line a full-bleed band of photograph
-   * stops on. Five layouts are built on it — it is the bottom of the picture on
-   * `band`, of the free field on `board`, and the top of the strip that carries
-   * the running text on `duo`, `trio`, `band` and `comparison` — so a diagram on
-   * one slide and a photograph on the next stop on the same line, and the text
-   * under them starts on the same one.
+   * stops on. Four layouts are built on it — it is the bottom of the free
+   * field and of a full-bleed photograph on `board`, and the top of the strip
+   * that carries the running text on `duo`, `trio` and `comparison` — so a
+   * diagram on one slide and a photograph on the next stop on the same line,
+   * and the text under them starts on the same one.
    */
   --strip-top: 841px;
 
@@ -188,6 +200,20 @@
   --rule-bleed: var(--margin-x);   /* how far it runs past the title's edge */
 
   --title-align: left;
+
+  /*
+   * Where a title sits, said in two numbers. Every title the theme places is
+   * anchored by its BOTTOM edge and grows upwards, so a layout moves it by
+   * resetting these — never by restating the properties. --title-bottom is
+   * measured to the glyphs of a one-line title (the half-leading correction
+   * is part of each value); --title-inset is the side inset of its box, which
+   * spans both insets so `mirror` and `centered` move the type by alignment
+   * alone. The defaults are the everyday slide's: a one-line box from y=141
+   * to 237, spanning both margins.
+   */
+  --title-inset: var(--margin-x);
+  --title-bottom: calc(849px - var(--title-half-leading));   /* 1080 - 231 */
+
   --rule-left: calc(-1 * var(--rule-bleed));
   --rule-right: auto;
 
@@ -514,7 +540,8 @@ section svg[data-marp-fitting='svg'] { max-height: 580px; }
  * Elements below set `margin-bottom`, never the `margin` shorthand: Marpit
  * rescopes every selector behind the same prefix, which flattens the gap
  * between `pre` and `section > pre` to nothing, and a shorthand would then
- * silently wipe out the indent depending on which rule came last.
+ * silently wipe out the side margins a mirrored layout hangs its body on,
+ * depending on which rule came last.
  */
 section {
   width: 1920px;
@@ -583,8 +610,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /*
- * The title block sits low on the slide and grows downwards, dragging the rule
- * with it, so a one-line and a two-line title share the same first baseline.
+ * The base h1: size and alignment, for a title wherever it stands — including
+ * inside a free field, where it stays in flow.
  *
  * h1 is display:block on purpose: as a flex container every inline element in
  * the heading (**bold**, `code`) becomes a flex item and the spaces around it
@@ -595,9 +622,22 @@ h1 {
   display: block;
   font-size: var(--fs-content-xxlarge);
   line-height: 1.2;
-  margin-top: calc(77px - var(--title-half-leading));
-  margin-bottom: calc(151px - var(--title-half-leading));
   text-align: var(--title-align);
+}
+
+/*
+ * ...and every title the theme itself places — a direct child of the slide —
+ * is anchored by its bottom edge, reading --title-bottom and --title-inset
+ * (see the grid section at the top): the rule and the body stay put, and a
+ * second line grows upwards into the space above. `cover` keeps its own
+ * top-anchored title and `poster` its centred one, each opting out where its
+ * rules live.
+ */
+section > h1 {
+  position: absolute;
+  left: var(--title-inset);
+  right: var(--title-inset);
+  bottom: var(--title-bottom);
 }
 
 h1::after {
@@ -609,6 +649,17 @@ h1::after {
   width: var(--rule-width);
   height: var(--rule-height);
   background: var(--red);
+}
+
+/*
+ * The everyday slide's title is out of the flow like every other, so the body
+ * spaces itself off the padding instead. 313 = the title's box bottom at 237
+ * plus the 82px-to-glyphs gap `half` uses. Only on a slide that carries a
+ * title — without one the body starts at the top margin as always.
+ */
+section:not(.cover, .question, .half, .side, .duo, .trio, .image,
+            .split, .poster, .comparison, .board, .agenda):has(> h1) {
+  padding-top: 313px;
 }
 
 /*
@@ -637,18 +688,23 @@ h5 { font-size: var(--fs-content-medium); line-height: 1.2; margin-bottom: var(-
  * up — and the rule is the one thing on the page you notice moving. Out of
  * flow, the title keeps the position it has on a slide with no eyebrow at all.
  *
- * 63 px is where its capitals come out centred in the space above the title:
- * measured to the cap line of the title, at y=158, and not to the top of its
- * box, which is 16 px higher and would leave the eyebrow looking low.
+ * 71 px is where its capitals come out with the same air above and below, and
+ * both measures are to what you can see rather than to a box. Above: the top
+ * edge of the slide, because the eyebrow is the first thing on the page and
+ * the margin over it is white, not an edge anyone reads. Below: the x-line of
+ * the title at y=173 — the top of its lowercase, not the cap line, because
+ * the lowercase is the run of the word and the caps are the exception in it.
+ * Measured, the capitals' ink sits 6px into the h6 box and is 19px tall, so
+ * the box at 71 puts 77px of white over the ink and 77 under it.
  *
  * It spans both margins and takes its side from --title-align, so `mirror`
  * carries it across with the title rather than leaving it behind.
  */
 h6 {
   position: absolute;
-  top: 63px;
-  left: var(--margin-x);
-  right: var(--margin-x);
+  top: 71px;
+  left: var(--title-inset);
+  right: var(--title-inset);
   font-size: var(--fs-content-small);
   line-height: 1.2;
   text-transform: uppercase;
@@ -658,42 +714,35 @@ h6 {
 }
 
 /*
- * ...and 63 px is where the space above the title is only on the layouts that
- * put the title at the top of the slide. On the eight that put it lower, an
- * eyebrow left up there is in the opposite corner of the page from the thing it
- * labels, which is not an eyebrow at all — it is a stray line of small caps. So
- * on those it is placed against the title instead, --eyebrow-gap above it and
- * hanging off the same edge, and the markup does not change: an eyebrow is a
- * sixth-level heading on every layout in the theme, written the same way and
- * landing in the same place relative to the title it belongs to.
+ * ...and that top placement is only for the layouts that put the title at the
+ * top of the slide. On the seven that put it lower, an eyebrow left up there
+ * is in the opposite corner of the page from the thing it labels, which is
+ * not an eyebrow at all — it is a stray line of small caps. So on those it is
+ * anchored against the title instead: --eyebrow-gap above where a one-line
+ * title starts, measured up from the title's fixed bottom edge, hanging off
+ * the same side. The markup does not change: an eyebrow is a sixth-level
+ * heading on every layout in the theme, written the same way and landing in
+ * the same place relative to the title it belongs to.
  *
- * The two families anchor from opposite edges, the same way their titles do.
- * The four whose title measures from the top can hang the eyebrow off the same
- * line and lift it by its own height, which holds however many lines of title
- * follow it. The four whose title grows upwards from a fixed bottom edge cannot
- * — where their title starts depends on how much of it there is — so those
- * measure a single line of title up from that edge. A two-line title on one of
- * those four will reach its eyebrow; there is no way to place a box above a box
- * of unknown height in CSS, short of anchor positioning, which needs the anchor
- * to come first in the markup and here the title comes last.
+ * One line of title is all it can measure — every title grows upwards, so
+ * where it really starts depends on how much of it there is, and a box cannot
+ * be placed above a box of unknown height in CSS short of anchor positioning,
+ * which needs the anchor to come first in the markup and here the title comes
+ * last. A two-line title on any of them will therefore reach its eyebrow;
+ * titles are short by design, and if you need both, shorten the title. The
+ * side inset needs no rule of its own: the base h6 reads --title-inset, so it
+ * hangs off whatever edge the layout's title hangs off.
  *
- * The everyday slide, `cover` and `question` are deliberately not in the list.
- * Their titles are at the top and 63 px is a measured position, centred on the
- * cap line; re-deriving it from a box edge would only reproduce it less exactly.
+ * The everyday slide, `cover` and `question` are deliberately not in the
+ * list. Their one-line title puts its first line at the top of the slide, and
+ * up there the eyebrow answers to the page rather than to the title: 71px is
+ * the equal-air position measured in the base rule above, and re-deriving it
+ * from the title's box would only reproduce it less exactly. (Their two-line
+ * titles reach the eyebrow like everyone else's.)
  */
-section:is(.duo, .trio, .band, .image) h6 {
-  top: calc(900px - var(--title-half-leading) - var(--eyebrow-gap));
-  transform: translateY(-100%);       /* lift it by its own height, whatever that is */
-}
-
-section:is(.half, .side, .comparison, .board) h6 {
+section:is(.half, .side, .duo, .trio, .image, .comparison, .board) h6 {
   top: auto;
   bottom: calc(var(--title-bottom) + var(--title-line) + var(--eyebrow-gap));
-}
-
-section:is(.half, .side, .duo, .trio, .band, .image, .comparison, .board) h6 {
-  left: var(--title-inset, var(--title-left));
-  right: var(--title-inset, var(--title-left));
 }
 
 /*
@@ -767,40 +816,16 @@ svg:where(:not([fill])) { fill: currentColor; }
 
 /*
  * Flow content — everything a slide can carry that is not the title and not
- * absolutely positioned furniture. Named once here and reused by the three
- * rules below, so a layout never has to spell the list out again.
- *
- * A plain `div` is on the list because the size helpers are used by wrapping a
- * block in one — it is the only way to reach a fenced code block, which cannot
- * be given a class of its own. Without it the wrapper fell outside this rule
- * and so did everything inside it, no longer being a child of the section: the
- * block kept its size and silently lost its indent. The free fields are the
- * exception — they are positioned, and a margin would move them.
- *
- * The exclusion is written `:where(:not(…))` and not `:not(…)`, because `:is()`
- * takes the weight of its heaviest argument: a bare class in there would raise
- * this whole list from one element to one class and it would start outranking
- * the layouts that set a width of their own further down — `half` was the one
- * that showed it, its body spilling past the edge of the photograph. `:where()`
- * weighs nothing, so the list keeps the weight it had.
+ * absolutely positioned furniture — runs the full measure between the side
+ * margins on the everyday slide: the same horizontal extent the free field of
+ * `board` gets, so a table here and a diagram there open on the same edges.
+ * Nothing has to be declared for that; it is what the section's padding
+ * already does. The hanging indent the body used to carry by default lives on
+ * as the `indent` layout, with the other helpers at the end of the file — a
+ * padding there too, so neither says a list of flow elements. The lists of
+ * those left in the file are `half`'s, which really does size and move the
+ * body element by element.
  */
-section > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
-               div:where(:not(.right, .left))) {
-  margin-left: var(--indent);      /* the body hangs off the title */
-  max-width: var(--body-width);
-}
-
-/*
- * ...but only on the everyday slide. Every named layout places its own
- * content, so each of them takes the indent straight back off.
- */
-section:is(.cover, .question, .half, .side, .duo, .trio, .band, .image,
-           .split, .poster, .comparison, .board, .agenda)
-  > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
-        div:where(:not(.right, .left))) {
-  margin-left: 0;
-  max-width: none;
-}
 
 /*
  * Text helpers, one per step of the scale above, so asking for a size by hand
@@ -1016,7 +1041,8 @@ pre code {
  * spaced differently depending on an engine the theme does not choose.
  *
  * `margin-top` and `margin-bottom` rather than the shorthand: this is a child of
- * the section and carries the body indent in `margin-left`.
+ * the section, and on a mirrored `half` it carries the `margin-left: auto` that
+ * pushes the body under the title.
  *
  * The top margin collapses with the bottom margin of whatever precedes it, so
  * this is the gap either way round and not that gap added to a paragraph's.
@@ -1181,7 +1207,8 @@ footer { right: var(--page-inset); text-align: right; }
  * own has nothing to hold on to. Like the title's shadow it stays a local
  * bitmap in the exported PDF, the size of one line of text.
  */
-section:is(.cover, .band, .image) footer {
+section:is(.cover, .image) footer,
+section.board:has(> p > img:not([src$=".svg" i], [src^="data:image/svg"])) footer {
   color: var(--gray-photo);
   text-shadow: var(--photo-halo);
 }
@@ -1258,12 +1285,9 @@ section[data-marpit-advanced-background='pseudo'][data-marpit-advanced-backgroun
 section.cover { padding: 0 var(--margin-x) 0 388px; }
 
 section.cover h1 {
-  position: absolute;
   left: 388px;
   top: calc(603px - var(--title-half-leading));
-  margin: 0;
-  padding: 0;
-  font-size: var(--fs-content-xxlarge);
+  bottom: auto;                /* the one title anchored from the top */
   text-transform: uppercase;   /* the cover is always set in caps */
 }
 
@@ -1295,7 +1319,10 @@ section.cover p {
  * The black band is a solid inset shadow rather than a `linear-gradient` with
  * hard stops: gradients cannot be exported to vectors, so the whole slide
  * background would be rasterised to a page-sized bitmap, leaving a blurry edge
- * and a much heavier PDF. 772px = 1080 - 308.
+ * and a much heavier PDF. 798px = 1080 - 282: the white band is sized so a
+ * two-line title sits centred in it. The title's box bottom is anchored at
+ * y=237 and a second line grows upwards to y=45, so the band closes at
+ * 237 + 45 — the same 45px of white above and below the two-line box.
  */
 /*
  * The page is black — the slide takes the inverted palette, so the body in the
@@ -1305,16 +1332,19 @@ section.cover p {
  */
 section.question {
   background: var(--white);
-  box-shadow: inset 0 -772px 0 var(--black);
-  padding: 0;
+  box-shadow: inset 0 -798px 0 var(--black);
+  /* the body starts 92px under the band — the same clearance it had when the
+   * band was 308px tall. On the section, not on each block: a second
+   * paragraph must not open the gap again. */
+  padding: 374px 0 0;
 }
 
 /*
- * The "?", centred in the black band. 305px is not where the glyph's box goes
+ * The "?", centred in the black band. 292px is not where the glyph's box goes
  * but where its ink lands: a 768px "?" has a lot of empty line box above it and
- * none below, so setting the box by eye left 118px of black above the mark and
- * 61px under it. Measured, the ink is 555px tall, which centres in the 772px
- * band at y=416.5 — and the ink starts 111px below the top of the box.
+ * none below, so setting the box by eye leaves the mark visibly off centre.
+ * Measured, the ink is 555px tall, which centres in the 798px band at
+ * y=403.5 — and the ink starts 111px below the top of the box.
  *
  * Horizontally it is centred on the right half of the slide: the box is that
  * half and the glyph is centred in it, plus the same ink correction as above —
@@ -1328,7 +1358,7 @@ section.question::before {     /* the giant "?" */
   width: var(--half);
   text-align: center;
   translate: 19.5px 0;
-  top: 305px;
+  top: 292px;
   font-size: var(--fs-symbol-xlarge);
   font-weight: var(--fw-title);
   line-height: 1;
@@ -1337,30 +1367,21 @@ section.question::before {     /* the giant "?" */
 }
 
 /*
- * The title hangs from the bottom of the white band, so the last row always
- * rests in the same place whether there is one of them or two.
- *
- * The anchor is set so that two rows come out centred in the 308 px band:
- * two rows are 2 × 1.2 × 80 = 192 px, which leaves 58 px above and below,
- * putting the bottom of the block at y = 250. A single row then lands where
- * the second of two would — as if the first row were blank.
+ * The title keeps the everyday slide's own anchor and inset — the defaults —
+ * so a one-line title sits in exactly its place, box from y=141 to 237, and a
+ * second line grows upwards: a question and a Default in sequence hold their
+ * title still. The band is sized for two rows (see the box-shadow above); a
+ * one-row question keeps the extra white above, where the first row would
+ * have been. All this rule has to say is the ink, over the white band.
  */
 section.question h1 {
-  position: absolute;
-  left: 164px;
-  bottom: 830px;                 /* 1080 - 250 */
-  width: 1597px;
-  margin: 0;
   color: var(--black);
-  font-size: var(--fs-content-xxlarge);
-  line-height: 1.2;
 }
 
 section.question > p, section.question > ul, section.question > ol {
   margin-left: 158px;
   margin-right: var(--margin-x);
   max-width: 900px;
-  padding-top: 400px;
 }
 
 /* --- half and side ------------------------------------------------ */
@@ -1392,6 +1413,7 @@ section.question > p, section.question > ul, section.question > ol {
 
 section.half, section.side {
   --title-left: var(--margin-x);
+  --title-inset: var(--title-left);   /* what the eyebrow and the base h1 read */
   --title-bottom: calc(725px - var(--title-half-leading));   /* 1080 - 355 */
   --body-max: 739px;
   --rule-bleed: var(--title-left);        /* it bleeds off the slide edge */
@@ -1407,11 +1429,16 @@ section.side {
   padding-top: 610px;
 }
 
+/*
+ * The base anchor places the title; these two release its far side and cap
+ * its width instead, so a long title wraps at the half mark rather than
+ * running over the photo. The cap has to be a max-width and not the anchor's
+ * own span: with a photograph the section is only the 960px text half, and a
+ * box held by both insets would come out narrower than the measure the title
+ * is entitled to.
+ */
 section.half h1, section.side h1 {
-  position: absolute;
-  left: var(--title-left);
-  bottom: var(--title-bottom);
-  margin: 0;
+  right: auto;
   max-width: calc(var(--half) - var(--title-left));
 }
 
@@ -1430,24 +1457,35 @@ section.half h1, section.side h1 {
  * its right edge lands under the title's, which is what makes the two read as
  * one block instead of two.
  */
-section:is(.half, .side)[data-marpit-advanced-background-split='left'] {
+/*
+ * Both ways of mirroring — the photograph's mark and the field's div, see
+ * `.left` below — flip the same three things, so they are one rule: the
+ * title's variables, the title box released to its right anchor, and the body
+ * pushed over so its right edge lands under the title's. Only the padding
+ * differs between them: with a photograph the section is the 960px text half,
+ * with a field it is the whole slide, so each says its own left inset after.
+ */
+section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has(> .left)) {
   --title-align: right;
   --rule-left: auto;
   --rule-right: calc(-1 * var(--rule-bleed));
 
-  padding-left: 0;
   padding-right: var(--title-left);
 }
 
-section:is(.half, .side)[data-marpit-advanced-background-split='left'] h1 {
+section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has(> .left)) h1 {
   left: auto;
   right: var(--title-left);
 }
 
-section:is(.half, .side)[data-marpit-advanced-background-split='left']
+section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has(> .left))
   > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
         div:where(:not(.right, .left))) {
   margin-left: auto;
+}
+
+section:is(.half, .side)[data-marpit-advanced-background-split='left'] {
+  padding-left: 0;
 }
 
 /*
@@ -1517,7 +1555,8 @@ section.side > ul > li { margin-bottom: var(--space-3); }
  * itself in the field, where the height it is measured against is the field's.
  */
 :is(.right, .left) > p:has(> img:only-child),
-section.board > p:has(> img:only-child) { display: contents; }
+section.board > p:has(> img[src$=".svg" i]:only-child),
+section.board > p:has(> img[src^="data:image/svg"]:only-child) { display: contents; }
 /*
  * A code panel takes the whole field — its grey bleeding off the edge of the
  * slide is the point — but a table does not: it keeps the width of its own
@@ -1548,27 +1587,11 @@ section.board > p:has(> img:only-child) { display: contents; }
 
 /*
  * A field on the left is the mirror of the whole slide, so the title goes with
- * it: the block moves to the right half and the rule bleeds off that edge, the
- * same as when a photograph is what sits on the left.
+ * it — the shared mirror rule above does the moving; here the section is the
+ * whole 1920px, so the text is padded past the field.
  */
 section:is(.half, .side):has(> .left) {
-  --title-align: right;
-  --rule-left: auto;
-  --rule-right: calc(-1 * var(--rule-bleed));
-
   padding-left: var(--half);
-  padding-right: var(--title-left);
-}
-
-section:is(.half, .side):has(> .left) h1 {
-  left: auto;
-  right: var(--title-left);
-}
-
-section:is(.half, .side):has(> .left)
-  > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
-        div:where(:not(.right, .left))) {
-  margin-left: auto;
 }
 
 /* --- duo ---------------------------------------------------------- */
@@ -1593,27 +1616,28 @@ section:is(.half, .side):has(> .left)
  */
 
 /*
- * `duo`, `trio` and `band` share one footing: photos pinned to the top of the
- * slide, and then a band across the bottom that carries the title on the left
- * and the running text on the right half.
+ * `duo` and `trio` share one footing: photos pinned to the top of the slide,
+ * and then a band across the bottom that carries the title on the left and
+ * the running text on the right half.
  *
- * That bottom strip is the same on all three, so the text lands in the same
- * place on the slide whichever layout you are on. Photos, captions and title
- * are placed absolutely — they are fixed furniture, and where they land must
+ * That bottom strip is the same on both, so the text lands in the same place
+ * on the slide whichever layout you are on. Photos, captions and title are
+ * placed absolutely — they are fixed furniture, and where they land must
  * never depend on how much text there is — which leaves the paragraphs as the
  * only items in normal flow.
  *
- * The strip is the space `band` leaves under its photograph, 841px to the
- * bottom edge, and the text is centred in it. That is a trade: a centred block
- * begins lower the shorter it is, so a three-line paragraph and a four-line one
- * do not start on the same line and two of these slides in a row will not have
- * their first line at the same height. Hanging the text from the top of the
- * strip instead would fix the first line for any length, at the cost of the
- * block sitting high in the space whenever it is short. Centred was the
- * decision; if the jitter ever reads worse than the imbalance, `align-content:
- * start` and a padding of 868px is the way back.
+ * The strip is the space a full-bleed photograph on `board` leaves under
+ * itself, 841px to the bottom edge, and the text is centred in it. That is a
+ * trade: a centred block begins lower the shorter it is, so a three-line
+ * paragraph and a four-line one do not start on the same line and two of
+ * these slides in a row will not have their first line at the same height.
+ * Hanging the text from the top of the strip instead would fix the first line
+ * for any length, at the cost of the block sitting high in the space whenever
+ * it is short. Centred was the decision; if the jitter ever reads worse than
+ * the imbalance, `align-content: start` and a padding of 868px is the way
+ * back.
  */
-section.duo, section.trio, section.band {
+section.duo, section.trio {
   display: grid;
   grid-template-columns: 1fr;
   align-content: center;        /* centred in the strip, see above */
@@ -1622,15 +1646,15 @@ section.duo, section.trio, section.band {
 }
 
 /* the row gap does the spacing, so the items in flow carry no margins */
-section:is(.duo, .trio, .band) > * { margin: 0; }
+section:is(.duo, .trio) > * { margin: 0; }
 
 /*
  * The line beside the title, said out loud: `## Like this`.
  *
- * These five layouts all carry one — a sentence in the bottom strip, level with
+ * These four layouts all carry one — a sentence in the bottom strip, level with
  * the title and reading as its subtitle — and until now the only thing that
- * made a block that line was where it happened to sit. On `duo`, `trio` and
- * `band` it was whichever paragraph was left in normal flow once the photos and
+ * made a block that line was where it happened to sit. On `duo` and `trio` it
+ * was whichever paragraph was left in normal flow once the photos and
  * captions had been pinned; on `comparison` it had to be the paragraph directly
  * after the h1, because everything else there is in columns and a paragraph in
  * flow falls into the last one. Two rules, neither of them written down in the
@@ -1641,20 +1665,21 @@ section:is(.duo, .trio, .band) > * { margin: 0; }
  * reserves no level — every role in this theme is one the theme assigns, `###`
  * to the column headings of `comparison`, `####` to a photo caption, `######`
  * to the eyebrow — so an h2 was free to take this one. Where it goes in the
- * file stops mattering, on all five.
+ * file stops mattering, on all four.
  *
  * It is a subtitle by position and not by type: in the strip it takes the size,
  * the weight and the leading of the running text, because that is what the line
  * beside a title is. The heading level is how you say which line it is, not how
  * big it comes out.
  *
- * On `duo`, `trio` and `band` this rule only normalises the heading back to the
- * running text, because on those three anything left in normal flow lands in the
+ * On `duo` and `trio` this rule only normalises the heading back to the
+ * running text, because on those two anything left in normal flow lands in the
  * strip anyway — that is what the grid does with it, and a stray paragraph will
  * still turn up there. On `comparison` and `board` the h2 is the only way in:
- * the strip is placed absolutely, and a paragraph in flow falls into a column.
+ * the strip is placed absolutely, and a paragraph in flow falls into a column
+ * or into the field.
  */
-section:is(.duo, .trio, .band, .comparison, .board) > h2 {
+section:is(.duo, .trio, .comparison, .board) > h2 {
   font-size: var(--fs-content-medium);
   font-weight: var(--fw-body);
   line-height: 1.44;
@@ -1677,7 +1702,7 @@ section:is(.duo, .trio, .band, .comparison, .board) > h2 {
  * word inside a title — and the sentence beside the title would be the one
  * place in the deck where **bold** meant a colour instead of a weight.
  */
-section:is(.duo, .trio, .band, .comparison, .board) > h2 strong {
+section:is(.duo, .trio, .comparison, .board) > h2 strong {
   color: inherit;
   font-weight: var(--fw-strong);
 }
@@ -1688,38 +1713,23 @@ section:is(.duo, .trio, .band, .comparison, .board) > h2 strong {
  * `:has(> img:only-child)` and placed by `nth-of-type` — safe together, because
  * the combination never picks up a paragraph of text.
  */
-section:is(.duo, .trio) > :is(p:has(> img:only-child), h4),
-section.band > p:has(> img:only-child) { position: absolute; }
+section:is(.duo, .trio) > :is(p:has(> img:only-child), h4) { position: absolute; }
 
 /*
- * The title at the bottom left — the corner six layouts put it in, `duo`,
- * `trio`, `band` and `image` here and `comparison` and `board` further down.
- * All six place it the same way, so all six take the same rule; what each of
- * them says for itself is the inset it hangs off and the line it sits on. The
- * two families anchor from opposite edges and that is deliberate: these four
- * measure from the top, where the photograph above them ends, and the other two
- * from the bottom, so that a title running to two lines grows upwards into the
- * empty strip instead of down off the slide.
+ * The title at the bottom left — the corner five layouts put it in, `duo`,
+ * `trio` and `image` here and `comparison` and `board` further down. All five
+ * read the base anchor, so what each says for itself is two variables: the
+ * inset it hangs off and the line its bottom edge sits on. On these three a
+ * one-line title starts on the line the photograph ends on, y=894, exactly
+ * where it always did — and a second line grows upwards over the picture
+ * instead of falling off the slide.
  */
-section:is(.duo, .trio, .band, .image, .comparison, .board) h1 {
-  position: absolute;
-  left: var(--title-inset);
-  right: auto;
-  margin: 0;
-  padding: 0;
-  font-size: var(--fs-content-xxlarge);
-}
-
-section:is(.duo, .trio, .band, .image) {
-  --title-inset: var(--margin-x);
-}
-
-section:is(.duo, .trio, .band, .image) h1 {
-  top: calc(900px - var(--title-half-leading));   /* where the photograph ends */
+section:is(.duo, .trio, .image) {
+  --title-bottom: calc(96px - var(--title-half-leading));   /* 1080 - 984, one line under the photo */
 }
 
 /* the photo fills the box its paragraph defines, whatever that box is */
-section:is(.duo, .trio, .band, .image) img {
+section:is(.duo, .trio, .image) img {
   display: block;
   width: 100%;
   height: 100%;
@@ -1783,24 +1793,44 @@ section.trio > h4:nth-of-type(5) { left: calc(var(--edge) + 4 * (var(--col) + va
 section.trio > p:has(> img:only-child):nth-of-type(6),
 section.trio > h4:nth-of-type(6) { left: calc(var(--edge) + 5 * (var(--col) + var(--gutter))); }
 
-/* --- band --------------------------------------------------------- */
+/* --- photographs on board ----------------------------------------- */
 /*
- * A full-bleed band of image across the top. One image by default, or
- * `columns-2` … `columns-4` to share the band edge to edge with no gutter.
+ * The full-bleed band of image that used to be a layout of its own (`band`)
+ * is `board`'s photograph mode now. On a board, a raster image is a
+ * photograph: it is pinned across the top as a full-bleed panel — edge to
+ * edge, cropped to fit — filling exactly the rectangle the field centres
+ * everything else in, so a photograph on one slide and a diagram on the next
+ * sit on one centre line. An `.svg` image is a diagram and stays in the
+ * field, centred and undistorted; the theme already asks for diagrams as SVG
+ * (see *Diagrams in an `.svg` file* in the docs), and that is the line drawn
+ * here. One photograph by default, `columns-2` … `columns-4` to share the
+ * band edge to edge with no gutter.
  */
+section.board { --columns: 1; }
 
-section.band { --columns: 1; }
-
-section.band > p:has(> img:only-child) {
+section.board > p:has(> img:only-child):not(:has(> img[src$=".svg" i], > img[src^="data:image/svg"])) {
+  display: block;
+  position: absolute;
+  margin: 0;
   top: 0;
   left: 0;
   width: calc(100% / var(--columns));
-  height: var(--strip-top);   /* the band stops where the strip starts */
+  height: var(--field-bottom);   /* the band stops where the strip starts */
+  max-width: none;
 }
 
-section.band > p:has(> img:only-child):nth-of-type(2) { left: calc(100% / var(--columns)); }
-section.band > p:has(> img:only-child):nth-of-type(3) { left: calc(200% / var(--columns)); }
-section.band > p:has(> img:only-child):nth-of-type(4) { left: calc(300% / var(--columns)); }
+section.board > p:has(> img:only-child):not(:has(> img[src$=".svg" i], > img[src^="data:image/svg"])) > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+}
+
+section.board > p:has(> img:only-child):nth-of-type(2) { left: calc(100% / var(--columns)); }
+section.board > p:has(> img:only-child):nth-of-type(3) { left: calc(200% / var(--columns)); }
+section.board > p:has(> img:only-child):nth-of-type(4) { left: calc(300% / var(--columns)); }
 
 /* --- image -------------------------------------------------------- */
 /*
@@ -1986,7 +2016,7 @@ section.poster > :not(h1) { max-width: var(--body-width); }
  * centring it leaves the text sitting 9 px high. The top padding compensates
  * without breaking the centring.
  */
-section.poster h1 { padding-top: 18px; }
+section.poster h1 { position: static; padding-top: 18px; }   /* back in the flex flow */
 
 /*
  * A list is the exception to the centring. The box stays centred — the flex
@@ -2104,8 +2134,10 @@ section.comparison li code {
 
 /*
  * The title, bottom left, like every other title in the theme — placed by the
- * rule the four photo layouts share, further up. All this pair adds is its own
- * inset and the edge it hangs off. `board` takes the same one — see below.
+ * base anchor. All this pair says for itself is the two variables: its own
+ * inset, and the line its bottom edge sits on. `board` takes the same ones —
+ * see below. Under `mirror` the box stays where it is and the type moves to
+ * the other end of it, like every other title.
  *
  * These two used to be the exception, on the argument that you read the line
  * across the top, then the columns from left to right, and the title is where
@@ -2120,22 +2152,11 @@ section:is(.comparison, .board) {
   --rule-bleed: var(--title-inset);
 }
 
-section:is(.comparison, .board) h1 {
-  bottom: var(--title-bottom);
-  width: 1500px;
-}
-
-/* the variables come from `mirror` itself; only the box has to be moved */
-section:is(.comparison, .board).mirror h1 {
-  left: auto;
-  right: var(--title-inset);
-}
-
 /*
- * A line beside the title, the way `duo`, `trio` and `band` carry one: write a
+ * A line beside the title, the way `duo` and `trio` carry one: write a
  * `## Like this` and it lands in the right half of the bottom strip, level with
- * the title. It takes the same strip `duo`, `trio` and `band` use — the 868 px
- * line and the half mark — so a `comparison` and a `band` next to each other in
+ * the title. It takes the same strip `duo` and `trio` use — --strip-top and
+ * the half mark — so a `comparison` and a `duo` next to each other in
  * a deck put that line in the same place.
  *
  * It has to be placed rather than flowed because everything else on this layout
@@ -2152,7 +2173,7 @@ section.comparison > h2,
 section.board > h2 {
   position: absolute;
 
-  /* the box `duo`, `trio` and `band` get from their padding, in the same four
+  /* the box `duo` and `trio` get from their padding, in the same four
    * values and the same order, and centred in it the way they centre theirs */
   inset: var(--strip-top) var(--margin-x) 0 var(--half);
   align-content: center;
@@ -2169,10 +2190,12 @@ section:is(.comparison, .board).mirror > h2 {
 /* --- board -------------------------------------------------------- */
 /*
  * A free field across the top of the slide, with the title of `comparison`
- * bottom right. Nothing inside is placed for you: whatever the slide carries is
+ * bottom left. Nothing inside is placed for you: whatever the slide carries is
  * stacked and centred on both axes, so the field takes a diagram, a table, a
  * code block, an inline SVG or one big glyph as readily as a paragraph. It is
- * the free field of `half` grown to the full width of the slide.
+ * the free field of `half` grown to the full width of the slide — and handed
+ * a photograph instead, it becomes the full-bleed band (see *photographs on
+ * board* above).
  *
  *   <!-- _class: board -->
  *
@@ -2192,14 +2215,13 @@ section:is(.comparison, .board).mirror > h2 {
 
 /*
  * The field itself is the one declared with `.right` above; this is its box —
- * and the box is `band`'s photograph, exactly. Whatever `board` carries is
- * centred in the same rectangle a full-bleed image occupies on that layout, so
- * a diagram on one slide and a photograph on the next sit on the same centre
- * line and the deck does not shift under them. It is why the two share a title
- * position as well: below the field, bottom left.
+ * and the box is the photograph's, exactly. Whatever the field carries is
+ * centred in the same rectangle a full-bleed image fills, so a diagram on one
+ * slide and a photograph on the next sit on the same centre line and the deck
+ * does not shift under them.
  */
 section.board {
-  --field-top: 0px;                    /* the top edge of the band on `band` */
+  --field-top: 0px;                    /* the top edge of a full-bleed photograph */
   --field-bottom: var(--strip-top);    /* and its bottom edge */
 
   padding: var(--field-top) var(--margin-x) calc(1080px - var(--field-bottom));
@@ -2207,25 +2229,34 @@ section.board {
 
 /* --- agenda ------------------------------------------------------- */
 /*
- * A red title with no rule and a numbered list set against big gray numerals
- * with red dashes. Write it as an h1 and an ordered list.
+ * A title with no rule and a numbered list set against big gray numerals with
+ * red dashes. Write it as an h1 and an ordered list. The title is the base
+ * title, in the ink like every other — nothing to declare; write it
+ * `# **Contents**` when you want it red, the way bold marks a word in any
+ * heading.
  */
 
-section.agenda h1 {
-  color: var(--red);
-  margin-top: calc(76px - var(--title-half-leading));
-}
-
 /* the list is centred vertically as a block, so three items and eight both sit
- * on the middle of the slide instead of hanging off the top */
+ * on the middle of the slide instead of hanging off the top. Horizontally the
+ * block — numerals and rows together — takes two thirds of the measure and
+ * closes against the right margin, the way `indent` closes its own share:
+ * see --content-width at the top of the file. */
 section.agenda > ol {
+  /*
+   * How far the dash and the row stand off the numeral behind them: the size
+   * the numeral is set at, less a hair. A digit at 128px runs about 75px wide
+   * at its widest, so what is left is a clear gap and not an accident of
+   * which numbers the list happens to reach.
+   */
+  --agenda-inset: calc(var(--fs-symbol-xxsmall) - var(--space-1));
+
   position: absolute;
-  left: 795px;
+  left: calc(var(--margin-x) + var(--agenda-indent));
+  right: var(--margin-x);
   top: 50%;
   transform: translateY(-50%);
   margin: 0;
   padding: 0;
-  max-width: none;
   list-style: none;
   counter-reset: agenda;
 }
@@ -2241,7 +2272,14 @@ section.agenda > ol > li {
   position: relative;
   min-height: 136px;
   margin: 0;
-  padding: 48px 0 0 136px;
+
+  /*
+   * The row hangs off the dash the way a body block hangs off the title's
+   * rule: the line box starts under it, clear of the red, with the gap a
+   * title keeps between its glyphs and its rule — 9px at 80px of title, so
+   * 5.4px at this 48. The dash closes at y=26, so the box opens at 31.4.
+   */
+  padding: 31.4px 0 0 var(--agenda-inset);
   font-size: var(--fs-content-large);
   line-height: 1.2;
 }
@@ -2261,8 +2299,8 @@ section.agenda > ol > li::before {    /* the gray numeral behind */
 section.agenda > ol > li::after {     /* the red dash: the title rule, in miniature */
   content: '';
   position: absolute;
-  left: 133px;
-  top: 28px;
+  left: calc(var(--agenda-inset) - 3px);   /* the row's own side bearing */
+  top: 18px;                          /* level with the top of the numeral's ink */
   width: 100px;
   height: 8px;
   background: var(--red);
@@ -2273,11 +2311,71 @@ section.agenda > ol > li::after {     /* the red dash: the title rule, in miniat
 /* the three layouts with no side to hang a title from, so nothing to mirror */
 section:is(.centered, .split, .poster) { --title-align: center; }
 
-section.centered { text-align: center; }
-section.centered > * { margin-left: auto; margin-right: auto; }
+/* ...written twice like every helper — the class directive centres the slide,
+ * `<div class="centered">` one block: the text by alignment, a table or any
+ * other shrink-wrapped child by its margins */
+section.centered, .centered { text-align: center; }
+section.centered > *, .centered > * { margin-left: auto; margin-right: auto; }
 section.centered h1::after { left: 50%; right: auto; transform: translateX(-50%); }
 
-section.no-indent > * { margin-left: 0; max-width: none; }
+/*
+ * --- indent -------------------------------------------------------------
+ *
+ * The everyday slide with the body hung off the title: a quarter of the
+ * measure given away on the left, the three quarters left closing against
+ * the right margin. It was the everyday slide's default once; now the body
+ * runs the full measure and this layout is how you ask the indent back.
+ *
+ * It is one padding, not a rule per element. The title, the eyebrow, the
+ * rule and the slide number are all placed and read their own insets, so
+ * pushing the padding moves exactly the flow and nothing else — and
+ * `columns-N` composes instead of fighting, its columns running inside the
+ * indented measure.
+ */
+section.indent { padding-left: calc(var(--margin-x) + var(--indent)); }
+
+section.indent.mirror {
+  padding-left: var(--margin-x);
+  padding-right: calc(var(--margin-x) + var(--indent));
+}
+
+/*
+ * The block-scale form, for hanging one block of an ordinary slide: a margin
+ * on the div itself, held to the same three-quarter measure so it closes
+ * against the right margin like the slide-wide version. Inside a
+ * `section.indent` it would indent twice — the padding once and the margin
+ * again — so the two forms are for different slides, not for nesting.
+ */
+.indent {
+  margin-left: var(--indent);
+  max-width: var(--body-width);
+}
+
+/*
+ * --- justify ------------------------------------------------------------
+ *
+ * Running text set flush on both edges. Two routes, like every helper — the
+ * class directive justifies the slide, `<div class="justify">` one block:
+ *
+ *   <!-- _class: justify -->
+ *   <div class="justify">
+ *
+ * It reaches sentences only — paragraphs, list rows, quotes — and never a
+ * heading: a title is short, and stretching one to the measure opens holes
+ * you cannot close. Which is also the warning about the rest of it. A
+ * justified column this wide is fine; narrow it with `columns-3` or more and
+ * the word spaces stretch far enough to read as rivers down the page.
+ *
+ * `hyphens: auto` is asked for because it is what keeps those holes small,
+ * but the browser only hyphenates text whose language it knows — set `lang`
+ * in your marp-cli config (`lang: es`) or the property does nothing at all
+ * and nothing warns you.
+ */
+section.justify :is(p, li, blockquote, dt, dd),
+.justify, .justify :is(p, li, blockquote, dt, dd) {
+  text-align: justify;
+  hyphens: auto;
+}
 
 /*
  * --- mirror -------------------------------------------------------------
@@ -2305,16 +2403,12 @@ section.mirror:not(.centered, .split, .poster) {
 }
 
 /*
- * The body hangs off the title from the other side too — but only on the
- * everyday slide, the one place there is an indent to mirror. Every named
- * layout took it back off already and places its own content, and a
- * margin-right of 368px inside the columns of `comparison` would be a
- * disaster. Same list as the rule that removes the indent, for the same reason.
+ * The div form of the indent flips with the slide: on a mirrored slide the
+ * block gives its quarter away on the right instead. The slide-wide form
+ * needs nothing here — it is a padding, and `section.indent.mirror` above
+ * already moves it to the other side.
  */
-section.mirror:not(.cover, .question, .half, .side, .duo, .trio, .band, .image,
-                   .split, .poster, .comparison, .board, .agenda)
-  > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
-        div:where(:not(.right, .left))) {
+section.mirror .indent {
   margin-left: 0;
   margin-right: var(--indent);
 }
@@ -2324,7 +2418,7 @@ section.mirror:not(.cover, .question, .half, .side, .duo, .trio, .band, .image,
  *
  * How many of something a slide has, said once. Four layouts count columns and
  * they used to count them separately — `comparison` in text columns, `trio` in
- * photographs, `band` in panels of a strip, and everywhere else not at all.
+ * photographs, `board` in panels of its band, and everywhere else not at all.
  * They all read --columns now, and this is where it is set, after every layout
  * has declared what it counts by default: same specificity, later in the file,
  * so the class wins.
@@ -2335,33 +2429,33 @@ section.columns-4 { --columns: 4; }
 section.columns-5 { --columns: 5; }
 section.columns-6 { --columns: 6; }
 
+/* the way back to one, when a deck-wide `class:` in the front matter said
+ * otherwise — it says nothing any layout does not already say by default,
+ * and it is declared last so that it wins the argument */
+section.columns-1 { --columns: 1; }
+
 /*
  * ...and on a slide with no layout of its own it does the obvious thing: the
- * body runs in columns and the title spans them. The indent comes off, because
- * there is no longer one title to hang a single block of text from — it would
- * be applied inside every column instead.
+ * body runs in columns and the title spans them — and on `indent`, whose body
+ * is one padding, the columns run inside the indented measure.
  *
  * `comparison` is excluded because it has already set its own columns, on a
- * geometry of its own. `trio` and `band` need no exclusion: both are grid
- * containers, and multi-column layout does not apply to those, so the property
- * lands on them and does nothing while --columns goes on counting photographs.
+ * geometry of its own. `trio` and `board` need no exclusion: one is a grid
+ * container and the other a flex container, and multi-column layout applies
+ * to neither, so the property lands on them and does nothing while --columns
+ * goes on counting photographs and panels.
  */
 section:is(.columns-2, .columns-3, .columns-4, .columns-5, .columns-6):not(.comparison) {
   column-count: var(--columns);
   column-gap: var(--space-7);
 }
 
-section:is(.columns-2, .columns-3, .columns-4, .columns-5, .columns-6):not(.comparison)
-  > :is(h2, h3, h4, h5, p, ul, ol, pre, table, blockquote, figure,
-        div:where(:not(.right, .left))) {
-  margin-left: 0;
-  max-width: none;
-}
-
-section:is(.columns-2, .columns-3, .columns-4, .columns-5, .columns-6):not(.comparison)
-  > h1 {
-  column-span: all;
-}
+/*
+ * Where a column ends is the browser's to balance — except when you say it.
+ * Wrap a block in `<div class="break">` and it opens the next column; an
+ * empty `<div class="break"></div>` does the same for whatever follows it.
+ */
+.break { break-before: column; }
 
 /*
  * --- debug --------------------------------------------------------------
