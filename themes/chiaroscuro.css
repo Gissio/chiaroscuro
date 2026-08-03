@@ -197,7 +197,15 @@
   --rule-height: 20px;
   --rule-gap: calc(9px - var(--title-half-leading));   /* h1 bottom edge to rule */
   --rule-photo: 83.6%;    /* the rule under a photo, as a share of its width */
-  --rule-bleed: var(--margin-x);   /* how far it runs past the title's edge */
+  /*
+   * How far the rule runs past the title's edge — and by default exactly the
+   * inset the title hangs off, which is to say it closes flush with the edge of
+   * the slide. That is what every layout in the theme wants, so saying it once
+   * here means none of them has to: a layout moves --title-inset and its rule
+   * goes out to the edge with it. `cover`, whose title is neither at the margin
+   * nor meant to bleed off the page, is the one that sets its own.
+   */
+  --rule-bleed: var(--title-inset);
 
   --title-align: left;
 
@@ -1409,20 +1417,28 @@ section.question > p, section.question > ul, section.question > ol {
  * Everything the two layouts do not share is a variable: where the left margin
  * falls, where the bottom of the title sits, how wide the body runs, and the
  * padding-top, which is simply where the body starts.
+ *
+ * The left margin is --title-inset, the theme's own name for it, and not a
+ * --title-left of their own: `side` is the only layout in the theme that moves
+ * a title sideways at all, and the inset it moves it to is the one the base
+ * anchor, the eyebrow, the red rule's bleed and the mirror all already read. It
+ * was a second name for one number, and the padding, the width cap and the
+ * mirror each had to remember to use the local one.
+ *
+ * Which leaves `half` with nothing to say about it: its margin is the page
+ * margin, which is what the base anchor gives every title that does not ask
+ * for another.
  */
 
-section.half, section.side {
-  --title-left: var(--margin-x);
-  --title-inset: var(--title-left);   /* what the eyebrow and the base h1 read */
+section:is(.half, .side) {
   --title-bottom: calc(725px - var(--title-half-leading));   /* 1080 - 355 */
   --body-max: 739px;
-  --rule-bleed: var(--title-left);        /* it bleeds off the slide edge */
 
-  padding: 437px 0 0 var(--title-left);   /* 355 + 82, the title-to-body gap `side` has */
+  padding: 437px 0 0 var(--title-inset);   /* 355 + 82, the title-to-body gap `side` has */
 }
 
 section.side {
-  --title-left: 144px;
+  --title-inset: 144px;
   --title-bottom: calc(552px - var(--title-half-leading));   /* 1080 - 528 */
   --body-max: 772px;
 
@@ -1437,9 +1453,9 @@ section.side {
  * box held by both insets would come out narrower than the measure the title
  * is entitled to.
  */
-section.half h1, section.side h1 {
+section:is(.half, .side) h1 {
   right: auto;
-  max-width: calc(var(--half) - var(--title-left));
+  max-width: calc(var(--half) - var(--title-inset));
 }
 
 /*
@@ -1470,12 +1486,12 @@ section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has
   --rule-left: auto;
   --rule-right: calc(-1 * var(--rule-bleed));
 
-  padding-right: var(--title-left);
+  padding-right: var(--title-inset);
 }
 
 section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has(> .left)) h1 {
   left: auto;
-  right: var(--title-left);
+  right: var(--title-inset);
 }
 
 section:is(.half, .side):is([data-marpit-advanced-background-split='left'], :has(> .left))
@@ -1716,16 +1732,32 @@ section:is(.duo, .trio, .comparison, .board) > h2 strong {
 section:is(.duo, .trio) > :is(p:has(> img:only-child), h4) { position: absolute; }
 
 /*
- * The title at the bottom left — the corner five layouts put it in, `duo`,
- * `trio` and `image` here and `comparison` and `board` further down. All five
- * read the base anchor, so what each says for itself is two variables: the
- * inset it hangs off and the line its bottom edge sits on. On these three a
- * one-line title starts on the line the photograph ends on, y=894, exactly
- * where it always did — and a second line grows upwards over the picture
- * instead of falling off the slide.
+ * The title at the bottom left — the corner five layouts put it in: `duo`,
+ * `trio` and `image` here, `comparison` and `board` further down. It is one
+ * position, and this is the whole of what the five of them say about it.
+ *
+ * They read the base anchor, and the base anchor already hangs a title off the
+ * page margin and runs its rule out to the slide edge from there, so none of
+ * them declares a side: the corner is the same corner on all five, and the red
+ * rule under it the same length. What is left to say is the line the bottom
+ * edge sits on — one number, one declaration, five layouts.
+ *
+ * Both halves of that used to be said twice, and differently each time.
+ * `comparison` and `board` set --title-inset: 119px, the source deck's own
+ * number, which put their titles 17px left of every other title in the deck —
+ * and 17px right of every other one when mirrored, since the inset spans both
+ * sides. And `duo`, `trio` and `image` anchored at y=984, 8px above the other
+ * two, so a `duo` followed by a `board` lifted the title and its rule off the
+ * line and set them back down. Neither gap was a decision anyone had made;
+ * both were two source decks disagreeing, and on the five layouts that put the
+ * title in the same corner they read as the corner failing to hold still.
+ *
+ * A one-line title still starts under the photograph on the three that have
+ * one, and a second line grows upwards over the picture instead of falling off
+ * the slide.
  */
-section:is(.duo, .trio, .image) {
-  --title-bottom: calc(96px - var(--title-half-leading));   /* 1080 - 984, one line under the photo */
+section:is(.duo, .trio, .image, .comparison, .board) {
+  --title-bottom: calc(88px - var(--title-half-leading));   /* 1080 - 992 */
 }
 
 /* the photo fills the box its paragraph defines, whatever that box is */
@@ -2133,24 +2165,19 @@ section.comparison li code {
 }
 
 /*
- * The title, bottom left, like every other title in the theme — placed by the
- * base anchor. All this pair says for itself is the two variables: its own
- * inset, and the line its bottom edge sits on. `board` takes the same ones —
- * see below. Under `mirror` the box stays where it is and the type moves to
- * the other end of it, like every other title.
+ * The title, bottom left, like every other title in the theme — and nothing to
+ * declare for it here. The corner is placed once, for all five layouts that
+ * put a title in it; see *the title at the bottom left* under `duo` above.
+ * Under `mirror` the box stays where it is and the type moves to the other end
+ * of it, like every other title.
  *
- * These two used to be the exception, on the argument that you read the line
+ * These two used to put it bottom RIGHT, on the argument that you read the line
  * across the top, then the columns from left to right, and the title is where
  * that finishes. It is a good argument for one slide and a bad rule for a deck:
  * every other layout hangs its title off the left, and two that did not made
  * the red rule appear to change sides for no reason the audience could see.
  * The right-hand version is still here — it is what `mirror` gives you.
  */
-section:is(.comparison, .board) {
-  --title-inset: 119px;
-  --title-bottom: calc(88px - var(--title-half-leading));
-  --rule-bleed: var(--title-inset);
-}
 
 /*
  * A line beside the title, the way `duo` and `trio` carry one: write a
