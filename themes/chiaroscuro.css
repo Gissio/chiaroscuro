@@ -637,9 +637,9 @@ h1 {
  * ...and every title the theme itself places — a direct child of the slide —
  * is anchored by its bottom edge, reading --title-bottom and --title-inset
  * (see the grid section at the top): the rule and the body stay put, and a
- * second line grows upwards into the space above. `cover` keeps its own
- * top-anchored title and `poster` its centred one, each opting out where its
- * rules live.
+ * second line grows upwards into the space above. `poster`, whose statement is
+ * centred and stays centred as it grows, is the one that opts out, where its
+ * own rules live.
  */
 section > h1 {
   position: absolute;
@@ -1292,16 +1292,34 @@ section[data-marpit-advanced-background='pseudo'][data-marpit-advanced-backgroun
  * from the inverted palette; the layout only has to say where things go */
 section.cover { padding: 0 var(--margin-x) 0 388px; }
 
+/*
+ * The title is anchored by its bottom edge like every other in the theme, so a
+ * second row grows upwards into the black above rather than down into the rule
+ * and the credits under it. 393 = 1080 - 687, the foot of a one-line title
+ * where it has always been; the glyphs of a one-line cover title do not move.
+ *
+ * Only the left inset is written here. The title box closes on the right
+ * margin like everyone else's, so --title-inset — which sets BOTH sides — is
+ * not the way to say it, and the rule hangs off --rule-bleed rather than off
+ * that inset anyway.
+ */
+section.cover { --title-bottom: calc(393px - var(--title-half-leading)); }
+
 section.cover h1 {
   left: 388px;
-  top: calc(603px - var(--title-half-leading));
-  bottom: auto;                /* the one title anchored from the top */
   text-transform: uppercase;   /* the cover is always set in caps */
 }
 
-/* the rule runs 300px back from the title, and sits lower than the usual gap */
-section.cover { --rule-bleed: 300px; }
-section.cover h1::after { top: calc(107px + var(--title-half-leading)); }
+/*
+ * The rule runs 300px back from the title, and sits lower than the usual gap:
+ * 17px under the box instead of 3. Said as a gap and not as an offset from the
+ * title's top, so it follows the foot of the title down however many rows the
+ * title takes — which is the whole point of anchoring the title by its bottom.
+ */
+section.cover {
+  --rule-bleed: 300px;
+  --rule-gap: calc(23px - var(--title-half-leading));
+}
 
 section.cover p {
   position: absolute;
