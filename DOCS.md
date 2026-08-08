@@ -966,11 +966,26 @@ mathematical operators — quantifiers, relations, arrows — will fall back gly
 glyph and set one formula in two faces. Set it to `unset` to have KaTeX's own
 faces back.
 
+The override stops short of the faces a text font cannot stand in for. KaTeX
+does not stretch a delimiter: it swaps in a taller drawing of one from
+`KaTeX_Size1`–`Size4`, where the parenthesis at U+0028 is the height of a
+fraction. Times has a parenthesis at that codepoint too — the ordinary one — so
+under a blanket override `\left(` around a fraction came out at the size of the
+text beside it, and the display `\sum` came out a text-size sigma. The same
+holds wherever the notation asks for a face rather than a letter: `\mathbb`,
+`\mathcal`, `\mathscr`, `\mathfrak`, `\mathtt`, `\mathsf`. Those classes are
+handed back to KaTeX's own declarations, so `--font-math` governs the roman,
+the italic and the bold, and nothing that only exists in a KaTeX face. The
+delimiters and the two script faces are the only files the deck fetches from
+the network; a render without one degrades to small delimiters rather than to
+nothing.
+
 Montserrat is **embedded in the CSS as base64**, as a variable font of weight
 100–900 in the `latin` and `latin-ext` subsets. Composing and exporting need
 neither an internet connection nor installed fonts, and the HTML and PDF you
-export are self-contained. That is most of the theme's ~300 kB. Code is set in
-Consolas with system fallbacks; no monospaced font is embedded.
+export are self-contained — the KaTeX faces above are the one exception, and
+only on a deck that sets maths. That is most of the theme's ~300 kB. Code is
+set in Consolas with system fallbacks; no monospaced font is embedded.
 
 The theme is MIT licensed. Montserrat is under the SIL Open Font License 1.1.
 `assets/placeholder.jpg` is filler for the example deck only — replace it with

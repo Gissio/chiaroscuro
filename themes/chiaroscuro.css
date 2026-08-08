@@ -1075,6 +1075,59 @@ pre code {
 .katex .mathtt, .katex .texttt { font-family: KaTeX_Typewriter !important; }
 
 /*
+ * The accents need a different repair, because what is wrong with them is not
+ * the face. KaTeX stacks `\hat{x}` as two rows of one vlist, and — read the
+ * markup — it puts both at the same `top`. Nothing lifts the circumflex off the
+ * letter except the circumflex itself: U+005E in KaTeX_Main is drawn high above
+ * the baseline, at accent height, and the stacking relies on that. Times has a
+ * glyph at U+005E too, the ordinary one, drawn low and larger — so the accent
+ * came down onto the letter. That is the whole bug, and it is a constant: the
+ * gap between where the two fonts draw the same character.
+ *
+ * KaTeX does compute one shift, and only above x-height: `R` is raised .2523em
+ * and `\theta` .2634em, `x` and `\mathbf{x}` next to nothing. That part stays
+ * correct to within the difference in cap height between the two faces, which
+ * is a couple of hundredths of an em and does not show.
+ *
+ * So the accent is the one place where the substitution has to be undone rather
+ * than compensated: hand the accent glyph back to KaTeX_Main and every number
+ * KaTeX computed becomes true again. One rule, no magic offsets, and it is right
+ * for every accent at once — which matters, because KaTeX writes the SAME markup
+ * for all the narrow ones and only the character inside differs:
+ *
+ *     \hat U+005E   \tilde U+007E   \bar U+02C9
+ *     \dot U+02D9   \check U+02C7   \acute U+02CA
+ *
+ * There is no selector that can tell them apart. Anything keyed to the shape of
+ * one — a `content` substitution, a hand-tuned size or lift — lands on all six.
+ * An earlier version of this rule printed U+02C6 over the top to get Times's
+ * prettier circumflex, fitted to a scan of Manolakis; it also turned `\tilde`
+ * into a circumflex, and `\bar`, and `\dot`. Do not go back to that shape of fix.
+ *
+ * What it cost to give that up, measured on `\hat{x}` alone against the book, in
+ * ratios that are scale-free — the only kind that survives comparing print to a
+ * render. Manolakis, then this rule, then the substitution that broke the others:
+ *
+ *     accent width / x width      .654   .576   .655
+ *     centre offset / x width     .157   .106   .167
+ *     gap / x-height              .258   .201   .268
+ *
+ * A slightly smaller, slightly tighter accent, and correct everywhere. If it is
+ * ever retuned, measure on `\hat{x}` ALONE: beside a summation or tall
+ * parentheses the eye accepts a tighter gap and a worse centring, which is how
+ * two earlier attempts at this went wrong.
+ *
+ * `\widehat` is the control: it is immune either way, because KaTeX draws the
+ * wide accent as an SVG scaled to the measured base, with no .accent-body span
+ * for any of this to reach. `\vec` is drawn the same way and is immune too.
+ *
+ * This is the one rule here that fetches a face the deck would not otherwise
+ * pull — KaTeX_Main-Regular. Without a network the accent falls back to Times
+ * and lands on the letter, which is the pre-repair behaviour, not a new failure.
+ */
+.katex .accent .accent-body > .mord { font-family: KaTeX_Main !important; }
+
+/*
  * A displayed equation (`$$…$$`) gets more air above and below than a paragraph
  * does. It is a block the eye stops on rather than another row of the argument,
  * and at the paragraph gap it read as one more line of the paragraph it had
