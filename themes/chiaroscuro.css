@@ -1035,6 +1035,46 @@ pre code {
 .katex, .katex * { font-family: var(--font-math) !important; }
 
 /*
+ * And then the exceptions, which are not a matter of taste. Some of what KaTeX
+ * writes is not a letter to be set in another face: it is a glyph that only
+ * exists in a face of KaTeX's own, and asking a text face for it gets whatever
+ * that face happens to have at the same codepoint — or nothing.
+ *
+ * The big delimiters are the case that gives it away. KaTeX does not stretch a
+ * parenthesis; it swaps in a taller drawing of one from KaTeX_Size1 through
+ * Size4, where U+0028 is a paren the height of a fraction. Times has a paren at
+ * U+0028 too, the ordinary one, so `\left(` around a fraction came out at the
+ * size of the text beside it. The same for the display-size operators — the
+ * `\sum` of the periodogram was a text-size sigma — and the same, for the same
+ * reason, everywhere the notation asks for a face and not for a letter:
+ * `\mathbb{C}` was a plain C, `\mathcal{N}` a plain N.
+ *
+ * So the rule above governs the faces a text font can actually stand in for —
+ * roman, italic, bold — and these hand the rest back. They repeat KaTeX's own
+ * declarations verbatim; the specificity and the !important are only there to
+ * outrank the blanket rule above, which needed both to reach the spans.
+ *
+ * These are the only faces the deck ever fetches, so a render without a network
+ * degrades to the old behaviour — small delimiters — rather than to nothing.
+ */
+.katex .delimsizing.size1, .katex .delimsizing.size1 * { font-family: KaTeX_Size1 !important; }
+.katex .delimsizing.size2, .katex .delimsizing.size2 * { font-family: KaTeX_Size2 !important; }
+.katex .delimsizing.size3, .katex .delimsizing.size3 * { font-family: KaTeX_Size3 !important; }
+.katex .delimsizing.size4, .katex .delimsizing.size4 * { font-family: KaTeX_Size4 !important; }
+.katex .delimsizing.mult .delim-size1 > * { font-family: KaTeX_Size1 !important; }
+.katex .delimsizing.mult .delim-size4 > * { font-family: KaTeX_Size4 !important; }
+
+.katex .op-symbol.small-op { font-family: KaTeX_Size1 !important; }
+.katex .op-symbol.large-op { font-family: KaTeX_Size2 !important; }
+
+.katex .amsrm, .katex .mathbb, .katex .textbb { font-family: KaTeX_AMS !important; }
+.katex .mathcal { font-family: KaTeX_Caligraphic !important; }
+.katex .mathfrak, .katex .textfrak { font-family: KaTeX_Fraktur !important; }
+.katex .mathscr, .katex .textscr { font-family: KaTeX_Script !important; }
+.katex .mathsf, .katex .textsf { font-family: KaTeX_SansSerif !important; }
+.katex .mathtt, .katex .texttt { font-family: KaTeX_Typewriter !important; }
+
+/*
  * A displayed equation (`$$…$$`) gets more air above and below than a paragraph
  * does. It is a block the eye stops on rather than another row of the argument,
  * and at the paragraph gap it read as one more line of the paragraph it had
