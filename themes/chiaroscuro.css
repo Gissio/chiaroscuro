@@ -1056,8 +1056,8 @@ pre code {
  * this is the gap either way round and not that gap added to a paragraph's.
  */
 p:has(> .katex-display, > mjx-container[display='true']) {
-  margin-top: var(--space-5);
-  margin-bottom: var(--space-5);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
 }
 
 .katex-display, mjx-container[display='true'] {
