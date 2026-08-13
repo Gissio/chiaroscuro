@@ -15,6 +15,7 @@ command:
 ```yaml
 themeSet: ./themes
 allowLocalFiles: true
+html: true
 ```
 
 `marp-cli` looks for `.marprc.yml` **only in the directory you run it from**,
@@ -33,9 +34,14 @@ marp deck.md --theme themes/chiaroscuro.css --pdf
 
 ```json
 {
-  "markdown.marp.themes": ["./themes/chiaroscuro.css"]
+  "markdown.marp.themes": ["./themes/chiaroscuro.css"],
+  "markdown.marp.html": "all"
 }
 ```
+
+`markdown.marp.html` is the extension's name for the `html: true` above: both
+let an inline `<svg>` or a `style` attribute past Marp's allowlist — see *The
+content series* for what a deck loses without them.
 
 If the extension warns *"The specified theme 'chiaroscuro' is not recognized"*,
 that setting has not reached it — check you opened the folder as a workspace and
@@ -45,8 +51,9 @@ not the `.md` file on its own.
 
 `theme: chiaroscuro` does not fail loudly. If the theme is not registered, Marp
 falls back to its `default` theme without a word. The tell is unmistakable once
-you know it: **Segoe UI, `#224466` headings and a 960 × 540 canvas**. If you see
-that, the theme never loaded — go back and register it.
+you know it: **a 1280 × 720 canvas, `#224466` headings and body text in Lato** —
+or in Trebuchet MS, further down that theme's stack, when the deck cannot reach
+the web font. If you see that, the theme never loaded — go back and register it.
 
 ## Quick start
 
@@ -78,7 +85,7 @@ running text on it goes brief — a line or two before each equation, listing or
 table. Sustained prose belongs on `half`, and `indent` hangs the body off the
 title instead.
 
-Every title in the theme is anchored by its **bottom edge**: a title that
+Every title the theme places is anchored by its **bottom edge**: a title that
 wraps grows upwards, and the red rule and the body under it stay exactly
 where they were. That is why titles everywhere are short by design.
 ```
@@ -87,15 +94,16 @@ Pick a layout per slide with a Marp class directive, `<!-- _class: name -->`.
 Modifiers go in the same directive, space separated: `<!-- _class: half dark -->`.
 
 Render `example.md` to see all of it at once — from the repository root, where
-`.marprc.yml` registers the theme and allows local files:
+`.marprc.yml` registers the theme, allows local files and turns HTML on:
 
 ```bash
 marp example.md --pdf -o example.pdf
 ```
 
-Run it from anywhere else and you must say both things yourself:
-`--theme themes/chiaroscuro.css --allow-local-files`. Forget the first and you
-get the fallback described above.
+Run it from anywhere else and you must say all three yourself:
+`--theme themes/chiaroscuro.css --allow-local-files --html`. Forget the first
+and you get the fallback described above; forget the last and the deck's inline
+SVG comes out as source code.
 
 ## Layouts
 
@@ -181,12 +189,13 @@ one-line and a three-line title leave the red rule and the body underneath in
 exactly the same place.
 
 The right half does not have to be a photo. Wrap anything in a `div` with the
-`right` class and it is stacked and centred in that half. The field is free: it
-carries no type style and no inset of its own, so it takes a code block, a list,
-a table or an inline SVG, and gets the full 960 px to do it in — a code panel
-bleeds off the right edge of the slide, which is the intent, not an oversight. A
-table is the one thing that keeps the width of its own contents, centred; wrap
-it in `wide` when it should fill the field instead:
+`right` class and you get **the free field**, the box `split` and `board` are
+built on too: whatever it carries is stacked and centred on both axes, with no
+type style and no inset of its own, so it takes a code block, a list, a table,
+a picture, an inline SVG or one big glyph as readily as a paragraph. Here it
+gets the full 960 px — a code panel bleeds off the right edge of the slide,
+which is the intent, not an oversight. A table alone keeps the width of its own
+contents, centred; wrap it in `wide` to fill the field instead:
 
 ````markdown
 <div class="right">
@@ -211,15 +220,21 @@ field with the type helpers rather than reaching for CSS:
 
 **`duo`** and **`trio`** share one footing: photos pinned across the
 top, and a band across the bottom carrying the title on the left and the running
-text on the right half. That band is the same strip on both, and the text
-hangs from a fixed line inside it, so the first row lands in the same place
-whichever layout you are on and however long the text runs — three slides in a
-row do not jitter. Four rows is the practical maximum; past that the text
-reaches the bottom edge. Order matters — photo, caption, photo, caption, …, then
-the running text, then the `h1`. Bold runs in a caption come out red.
+text on the right half. That band is the same strip on both, so a `duo` and a
+`trio` in sequence put their text in the same place. Inside the strip the text
+is centred rather than hung from a fixed line, which is the one trade the strip
+makes: a shorter paragraph begins lower than a longer one, so two of these
+slides in a row do not start their first row at exactly the same height. Four
+rows is the practical maximum; past that the text reaches the bottom edge.
+Order matters within each kind and not across them — the first photo takes the
+left panel and the first caption goes under it, and so on down the row — so the
+title, the line beside it and the running text can go wherever you like in the
+file. Bold runs in a caption come out red.
 
 ```markdown
 <!-- _class: duo -->
+
+# Title
 
 ![](left.jpg)
 
@@ -230,28 +245,25 @@ the running text, then the `h1`. Bold runs in a caption come out red.
 #### Something in **shadow**
 
 The running text, however many paragraphs it runs to.
-
-# Title
 ```
 
-`trio` takes three photos, or two to six with `columns-2` … `columns-6` — the
-photographs and their rules are rescaled to match, though past four they are
-smaller than their own captions. For a photograph with no caption at all — a
-full-bleed band across the top — hand it to `board`, which is what that layout
-does with one; see below.
+`trio` takes three photos, or two to six — the photographs and their rules are
+rescaled to match, though past four they are smaller than their own captions.
+For a photograph with no caption at all — a full-bleed band across the top —
+hand it to `board`, which is what that layout does with one; see below.
 
 **`image`** — one photo covering the slide, centred, undistorted, cropped to
 fit. Like `cover`, `half`, `side` and `board`, it takes a credit line in the top
-right corner — see *Crediting a photograph* below. The photo is never veiled or dimmed: a title comes out bottom left carrying
-its own soft shadow, which lifts it off a busy picture without touching the
-picture itself.
+right corner — see *Crediting a photograph* below. The photo is never veiled or
+dimmed: a title comes out bottom left carrying its own soft shadow, which lifts
+it off a busy picture without touching the picture itself.
 
 ```markdown
 <!-- _class: image -->
 
-![](photo.jpg)
-
 # Optional title
+
+![](photo.jpg)
 ```
 
 **`split`** — half the slide black, half white, with a free field on each half.
@@ -276,10 +288,8 @@ What it is now.
 </div>
 ```
 
-The field is the same one `half`, `side` and `board` use — a half-slide column,
-full height, contents stacked and centred — so each side takes a title, a
-paragraph, a list, a code panel, a picture or an inline SVG, at whatever length
-it needs.
+Each half is the free field described under `half` — the same box and the same
+behaviour, one on each side of the slide.
 
 Each half is its own colour scope, so everything inside comes out right without
 your having to think about it: a code panel on the black half gets the dark
@@ -300,9 +310,12 @@ it grows to two or three rows. Add `dark` for the black version.
 # Everything in its **place**
 ```
 
-The statement is a title, written `#` like every other title in the theme.
-Anything else on the slide is ordinary content at the body size, so a poster can
-carry a line under its statement, or a list, without the two competing:
+The statement is a title, written `#` like every other title in the theme — and
+the one title the theme does not anchor by its bottom edge: it is centred on
+both axes and stays centred as it grows, where every other grows upwards from a
+fixed foot. Anything else on the slide is ordinary content at the body size, so
+a poster can carry a line under its statement, or a list, without the two
+competing:
 
 ```markdown
 <!-- _class: poster -->
@@ -314,21 +327,22 @@ And the line underneath, at the size of any other line in the deck.
 - or a list, whose rows range left while the block stays centred
 ```
 
-**`comparison`** — one `h3` per column, then its text and list; the `h1` goes
-last and lands at the bottom left, or bottom right with `mirror`. An `h2` lands
-beside it, in the same bottom strip `duo` and `trio` use, so a subtitle
-sits in the same place whichever of the four you are on — and here, where the
-strip is placed and the columns are in flow, `##` is the only way to reach it.
-The row of column headings starts on the same line as the title of an
-ordinary slide, and the columns run between the same side margins as every
-other layout — only the gutter between them is the template's own. Two columns
-by default, `columns-3` … `columns-6` for more. Past four the columns get narrow — prefer bare lists over
-prose. For plain running text in columns you do not need this layout at all: put
-`columns-2` on an ordinary slide and the body runs in columns with the title
-spanning them.
+**`comparison`** — one `h3` per column, then its text and list; the `h1` is
+placed rather than flowed and lands at the bottom left, or bottom right with
+`mirror`, wherever in the file you write it. An `h2` lands beside it in the
+bottom strip — see *The line beside the title*, which on this layout is the
+only way to put one there. The row of column headings starts on the same line
+as the title of an ordinary slide, and the columns run between the same side
+margins as every other layout — only the gutter between them is the template's
+own. Two columns by default, up to six; past four they get narrow — prefer bare
+lists over prose. For plain running text in columns you do not need this layout
+at all: put `columns-2` on an ordinary slide and the body runs in columns with
+the title spanning them.
 
 ```markdown
 <!-- _class: comparison columns-3 -->
+
+# Title
 
 ### First
 
@@ -344,34 +358,28 @@ A line about it.
 ### Third
 
 …
-
-# Title
 ```
 
-**`board`** — one free field across the top of the slide and the title of
-`comparison` under it, at the bottom left. Nothing inside the field is placed
-for you: whatever the slide carries is stacked and centred on both axes, so it
-takes a table, a diagram, a code block, an inline SVG or one big glyph as
-readily as a paragraph. It is the free field of `half` grown to the full width.
+**`board`** — the free field of `half` grown to the full width of the slide,
+with the title of `comparison` under it, at the bottom left. It behaves exactly
+as it does there, tables and `wide` included.
 
 ```markdown
 <!-- _class: board -->
+
+# Title
 
 | A | B |
 | --- | --- |
 | a | b |
 
 An optional line about it.
-
-# Title
 ```
 
 Every edge of the field is borrowed rather than invented: the sides sit on the
 left margin of `half` and its mirror on the right, and the top and bottom on
 the band a full-bleed photograph fills. Reach for it when what you want to
-show is one thing, wide, and the running text is a caption to it. Here too a
-table keeps the width of its own contents — add `wide` to the directive, or
-wrap the table in `<div class="wide">`, when it should span the field.
+show is one thing, wide, and the running text is a caption to it.
 
 **Handed a photograph, the field becomes a full-bleed band.** A **raster**
 image — a `.jpg`, a `.png` — is a photograph: it is pinned across the top,
@@ -379,21 +387,20 @@ edge to edge and cropped to fit, filling exactly the rectangle the field
 centres everything else in, so a diagram on one slide and a photograph on the
 next sit on one centre line. An `.svg` image is a diagram and stays in the
 field, centred and undistorted — the theme already asks for diagrams as SVG,
-and this is where that pays. One photograph by default, `columns-2` …
-`columns-4` to share the band edge to edge with no gutter; there are no
-captions, and the line beside the title is said with `##` as always. Like the
-other photo layouts it takes a credit in the top right corner — see
-*Crediting a photograph*.
+and this is where that pays. One photograph by default, up to four sharing the
+band edge to edge with no gutter; there are no captions, and the line beside
+the title is said with `##` as always. Like the other photo layouts it takes a
+credit in the top right corner — see *Crediting a photograph*.
 
 ```markdown
 <!-- _class: board -->
 <!-- _footer: photo credit -->
 
+# Title
+
 ## The line beside the title.
 
 ![](photo.jpg)
-
-# Title
 ```
 
 **`agenda`** — an `h1` and an ordered list. The theme draws the grey numerals
@@ -418,18 +425,21 @@ Combine with any layout, in the same directive:
 | --- | --- |
 | `dark` | Inverts the slide to black: text, table rules, list markers, code, pagination, footer. `split` ignores it. |
 | `mirror` | Puts the title, its rule and the body on the other side. |
-| `centered` | Centres the content, red rule included. Both routes: the directive centres the slide, `<div class="centered">` one block. |
+| `centered` | Centres the content, red rule included. |
 | `no-rule` | Drops the red rule under the title. |
-| `justify` | Sets running text flush on both edges — paragraphs, list rows and quotes, never a heading. Both routes, like the size helpers. |
+| `justify` | Sets running text flush on both edges — paragraphs, list rows and quotes, never a heading. |
 | `columns-1` … `columns-6` | How many of whatever the layout counts; `columns-1` is the way back to one after a deck-wide `class:` said otherwise. |
 | `debug` | Draws the box every element got, and lets overflow show. Not for a finished deck. |
 
+`centered` and `justify` also take a `div` of the same name, for one block, the
+way `indent` and every type helper below do; the rest are slide-wide only.
+
 ### Which side things are on
 
-Every layout hangs its title off the left, with the red rule bleeding off that
-edge. There are no exceptions, which is the point: the rule is the loudest thing
-on most slides, and a rule that changes sides from one slide to the next reads
-as a mistake rather than as a decision.
+Every layout that hangs a title off a side hangs it off the left, with the red
+rule bleeding off that edge, and there is no exception to the side: the rule is
+the loudest thing on most slides, and one that changes sides from one slide to
+the next reads as a mistake rather than as a decision.
 
 To go the other way on a slide that wants it, there are two mechanisms, and
 which one you use depends on whether anything else on the slide already implies
@@ -444,11 +454,11 @@ therefore no way for the picture and the type to end up on the same half.
 ```markdown
 <!-- _class: half -->
 
-![bg left](photo.jpg)
-
 # Title
 
 Body text.
+
+![bg left](photo.jpg)
 ```
 
 The free field has no such mark, so there you say it: `<div class="left">` is
@@ -468,11 +478,16 @@ on the left, and only the ink and the paper trade places.
 ```
 
 `centered`, `poster` and `split`'s two titles are centred and have no side to be
-on, so `mirror` leaves them alone.
+on, so `mirror` leaves them alone. Four layouts have no rule to move either:
+`question`, `split` and `poster` because the slide is one statement or already
+carries a hard edge down the middle, `agenda` because its red is spent on the
+dashes. And `cover`, which does carry one, is the layout whose rule stops short
+of the edge — it runs 300 px back from the title rather than off the page.
 
 `justify` is the fourth way text can range, and it is about the sentence
-rather than the slide: it sets paragraphs, list rows and quotes flush on both
-edges and never touches a heading, since stretching a short title to the
+rather than the slide: it sets paragraphs, list rows, quotes and the two halves
+of a definition list flush on both edges, and never touches a heading, since
+stretching a short title to the
 measure opens holes you cannot close. Which is also the caution about the
 rest: at the full measure it reads well, but narrow the column with
 `columns-3` or more and the word spaces stretch far enough to leave rivers
@@ -488,12 +503,12 @@ deck says what language it is in — set `lang` in your marp-cli config
 `columns-N` is one modifier, not four: it says how many of something a slide
 has, and each layout takes it to mean the thing it counts.
 
-| On | It counts |
-| --- | --- |
-| *(the everyday slide)* | Text columns, with the title spanning them. |
-| `comparison` | Text columns. Two by default. |
-| `trio` | Photographs in the row. Three by default; past four they get small. |
-| `board` | Photo panels sharing the band, edge to edge, no gutter. One by default. |
+| On | It counts | Default | Range |
+| --- | --- | --- | --- |
+| *(the everyday slide)* | Text columns, with the title spanning them. | 1 | 1–6 |
+| `comparison` | Text columns. | 2 | 2–6 |
+| `trio` | Photographs in the row; past four they get small. | 3 | 2–6 |
+| `board` | Photo panels sharing the band, edge to edge, no gutter. | 1 | 1–4 |
 
 Where a text column ends is the browser's to balance — except when you say
 it: wrap a block in `<div class="break">` and it opens the next column; an
@@ -552,17 +567,18 @@ int main() { return 0; }
 One more helper is width rather than size: **`.wide`** stretches a table to the
 full measure of whatever holds it — the free field of `half` and `board`, or
 the text column of the everyday slide. Everywhere, a table otherwise sits at
-the width of its own contents — ranged left, or centred on the axis a
-displayed equation takes by wrapping it in `<div class="centered">`. It reaches the table the same way the sizes do,
-through a variable (`--table-width`), and takes the same two routes: the class
-directive for every table on the slide, the `div` for one.
+the width of its own contents. Where that width lands depends on what holds it:
+in the flow of a slide it ranges left, and wrapping it in
+`<div class="centered">` puts it on the axis a displayed equation takes; in a
+free field it is centred already, like everything else in there. `.wide`
+reaches the table the same way the sizes do, through a variable
+(`--table-width`), and takes the same two routes.
 
-Both routes work for every helper — the class directive sizes the slide, the
-`div` sizes one block. If you fork the theme and add a helper of your own, note
-that each is declared **twice**, as `section.name` and as `.name`: Marpit scopes
-a selector that does not start with `section` as a descendant of the slide, so
-the bare form alone reaches a `div` inside the slide but never the slide itself,
-and a class directive using it would silently do nothing at all.
+If you fork the theme and add a helper of your own, note that each is declared
+**twice**, as `section.name` and as `.name`: Marpit scopes a selector that does
+not start with `section` as a descendant of the slide, so the bare form alone
+reaches a `div` inside the slide but never the slide itself, and a class
+directive using it would silently do nothing at all.
 
 ### The scale behind them
 
@@ -586,10 +602,10 @@ doubling — 128·256·512 and 192·384·768, two doubling series interleaved. I
 retune them, pick sizes that hold the alternation rather than sizes that look
 round on their own.
 
-Four of the steps the theme never spends on anything itself — **64**, **192**,
-**256** and **512** — but each has a helper like every other, so a deck can ask
-for any of the twelve. A step the theme does not use is not the same as a step
-you cannot reach.
+Five of the steps no layout in the theme spends on anything — **64**, **192**,
+**256**, **384** and **512** — but each has a helper like every other, so a
+deck can ask for any of the twelve. A step the theme does not use is not the
+same as a step you cannot reach.
 
 Every step has a helper, and all but one are named after the step they set. The
 exception is `.symbol`, which sets `--fs-symbol-medium` (384) as the bare name of
@@ -597,10 +613,12 @@ its family — the rung you get when you do not ask for one.
 
 ### The content series
 
-`--red` is the theme's own and it is spoken for: the rule under every title, the
-bars of `agenda` and the red dash beside each of its rows, a bold word in a
-heading. (The dash that marks an ordinary list row is a different thing — it is
-set in the ink of the page, like the text it belongs to.)
+`--red` is the theme's own and it is spoken for: the rule under every title and
+under each photo of `duo` and `trio`, the red dash beside every row of
+`agenda`, the giant "?" of `question`, the edge of a code panel and the
+keywords on it, and a bold word in a heading. (The dash that marks an ordinary
+list row is a different thing — it is set in the ink of the page, like the text
+it belongs to.)
 The four colours beside it are yours. They are declared at the top of the file
 as one series with the red at its head, and **no rule in the theme reads any of
 them** — they are for what you put on a slide, never for what the theme draws
@@ -637,21 +655,16 @@ value:
 <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="var(--accent-2)" /></svg>
 ```
 
-That route needs `html: true` in your config. Marp's default allowlist keeps the
-tag and **silently drops the `style` attribute** — a `<div style="…">` comes out
-as a bare `<div></div>`, so a row of swatches renders as nothing at all and
-nothing warns you. The classes above need no such setting.
+**That route needs `html: true`, and so does the rest of this section.** Marp's
+default allowlist fails two ways, neither of them loud: it keeps a `<div>` and
+**silently drops its `style`** — a row of swatches renders as nothing at all —
+and it escapes an inline `<svg>` whole, so the figure comes out as its own
+source code across the slide. The classes above need no such setting.
 
 ```yaml
 # .marprc.yml
 html: true
 ```
-
-**An inline `<svg>` needs `html: true` as well, and it fails more loudly than a
-dropped `style`.** Marp's default allowlist does not merely strip the element's
-attributes — it escapes the whole tag, so the figure renders as its own source
-code across the middle of the slide. Everything in the rest of this section
-assumes that setting.
 
 Inside an inline `<svg>`, the page's ink is the default. SVG's own initial
 fill is black — not the ink, which is what an unfilled `<text>` or shape
@@ -679,9 +692,10 @@ is a device of the theme's, not a follower of the local colour.
 
 **What the five promise.** They are anchors, the same hex on a white slide and
 on a black one, and the last three sit exactly where holding both grounds put
-them: the ramp darkens as it runs, and each of them rides as dark as black
-allows. Every one of the five keeps at least 3.7 : 1 against white *and* against
-black (against white 3.7, 4.1, 5.7, 5.7 and 5.6 : 1; against black 5.7, 5.1,
+them: the ramp darkens as it runs and then levels off, the three of them within
+a tenth of a point of each other, each riding as dark as black allows. Every
+one of the five keeps at least 3.7 : 1 against white *and* against black
+(against white 3.7, 4.1, 5.7, 5.7 and 5.6 : 1; against black 5.7, 5.1,
 3.7, 3.7 and 3.7 : 1), so any of them can set a word on either ground — the
 black layouts included. What that does not buy is distance inside the family: to
 red-green colour-blindness the purple, the violet and the blue are nearly one
@@ -704,11 +718,10 @@ these are published for what you draw, not used by what the theme draws.
 | `--sw-large` | 6 | emphasis: the one line the figure is about |
 | `--sw-xlarge` | 8 | the heaviest step |
 
-The six hold the symbol family's rhythm: from 2 up the ratio alternates 3:2 and
-4:3 and every second step is a doubling — 2·4·8 and 3·6 — which is why `medium`
-is the fourth of six here rather than the third. The 1 hangs below as a
-hairline, a case apart: it is the lightest line that still draws, and no ratio
-argument reaches it.
+From 2 up, the six hold the symbol family's rhythm — 2·4·8 and 3·6, the same
+alternation — which is why `medium` is the fourth of six here rather than the
+third. The 1 hangs below as a hairline, a case apart: the lightest line that
+still draws, and no ratio argument reaches it.
 
 **One thing this scale cannot promise that `--fs-*` can.** A stroke width is in
 the user units of its own `viewBox`, not in pixels, so the same step is only the
@@ -728,11 +741,11 @@ The theme's contract for those files is: **draw once, in the light palette, on
 a transparent background** — ink `#000000`, quiet rules `#cbcbcb`, the theme's
 red `#fa3a36` or any of the ramp for an accent, and no background rectangle.
 On a white slide the file renders as drawn. On the black layouts (`dark`,
-`cover`, `question`, `image`) the theme inverts SVG images and turns the hues
-back around, so the ink comes out white, the grays land where the dark palette
-wants them, and an accent comes back as a lighter shade of itself rather than
-its complement. You keep one file per figure and a slide can change ground
-without touching it.
+`cover`, `question`, `image`) and on the black half of `split`, the theme
+inverts SVG images and turns the hues back around, so the ink comes out white,
+the grays land where the dark palette wants them, and an accent comes back as a
+lighter shade of itself rather than its complement. You keep one file per
+figure and a slide can change ground without touching it.
 
 Two edges worth knowing. The inversion matches SVG only — a photograph or a
 PNG on a dark slide is left alone, which also means a *raster* diagram will
@@ -752,10 +765,11 @@ take one the same way — a Marp footer directive:
 
 It lands in the **top right corner of the picture**, on all five and with no
 exception — which is the point: the bottom right is the slide number's, the
-bottom left is the title's on four layouts, and a credit that moves from one
-corner to another between two slides reads as a mistake rather than as a
-decision. On a mirrored `half` or `side` that corner is the photograph's inner
-edge, so the credit stays on the picture rather than crossing to the paper.
+bottom left is where `duo`, `trio`, `image`, `comparison` and `board` put their
+title, and a credit that moves from one corner to another between two slides
+reads as a mistake rather than as a decision. On a mirrored `half` or `side`
+that corner is the photograph's inner edge, so the credit stays on the picture
+rather than crossing to the paper.
 
 It is small print, but it is small print on a photograph, so it is set heavier
 than the body rather than lighter: the title weight, at the size code and tables
@@ -770,9 +784,9 @@ front matter) puts a line on every slide from there on, in the same corner.
 Two small things the everyday slide can do:
 
 ```markdown
-###### Where we are          <!-- an eyebrow: caps, spaced, in the grey -->
-
 # The title
+
+###### Where we are          <!-- an eyebrow: caps, spaced, in the grey -->
 
 <figure>
 
@@ -816,6 +830,10 @@ the line under it is `##`:
 ```markdown
 <!-- _class: duo -->
 
+# Title
+
+## The sentence that goes beside the title.
+
 ![](one.jpg)
 
 #### First
@@ -823,10 +841,6 @@ the line under it is `##`:
 ![](two.jpg)
 
 #### Second
-
-## The sentence that goes beside the title.
-
-# Title
 ```
 
 Where you write it in the file does not matter, on any of the four. It is a
@@ -921,28 +935,31 @@ rather than per layout: a paragraph reads the same wherever it lands. Fork it in
 one place and the whole deck follows.
 
 The same holds for everything else the theme decides. The palette, the type
-scale, the spacing scale, the three weights, the red rule, the list marker and
+scale, the spacing scale, the two weights, the red rule, the list marker and
 the count of columns are all variables declared at the top of the file; a layout
 that departs from one resets the variable on itself rather than restating the
-property. If you are retuning the theme, the first two hundred lines are where
-the decisions live — not the thousand below them.
+property. If you are retuning the theme, the first four hundred lines are where
+the decisions live — not the two thousand below them.
 
 The palette is in three groups, and it is worth knowing which is which if you
 fork it. Three colours are **anchors** — black, white and the red — and mean the
 same thing wherever they appear. The nine under them are **contextual**: the
-page, the ink, the secondary ink, the table rule, the two code backgrounds and
-the three code colours. Those nine are redefined exactly once, on the four
-layouts that run their text on black — `dark`, `cover`, `question` and `image` —
-and everything else in the file reads them without knowing which side it is on.
-That is why `dark` has no rules of its own: change `--pre-bg` and a code panel
-follows on both a white slide and a black one.
+page, the ink, the secondary ink, the tint of the page that the numerals of
+`agenda` are set in, the table rule, the two code backgrounds and the two code
+colours. Those nine are redefined in exactly one place in the file, which
+covers the four layouts that run their text on black — `dark`, `cover`,
+`question` and `image` — and the black half of `split`, where the half is a box
+and a box is a scope. Everything else in the file reads them without knowing
+which side it is on. That is why `dark` has no rules of its own: change
+`--pre-bg` and a code panel follows on both a white slide and a black one.
+(A tenth is contextual in the same sense but sits outside that block: the
+secondary ink where it falls on a photograph, which `cover` and `image` set for
+themselves.)
 
-The five at the end are the **content series**, described above, and they are the
-only colours in the file the theme itself never draws with. Nothing breaks if you
-replace all five; nothing else in the deck moves.
-
-Change `--red` and you have a different theme, in one line — and the head of the
-series follows it, since `--accent-1` is that same red rather than a copy of it.
+The five at the end are the **content series**, whose contract is *The content
+series* above: no rule in the file reads them, so all five can go without
+anything else in the deck moving. Change `--red`, on the other hand, and you
+have a different theme in one line — the head of that series follows it.
 
 Maths comes out of one of two engines, and which one decides how much of it the
 theme can reach. Marp picks **MathJax** unless the deck asks for the other with
@@ -975,17 +992,30 @@ text beside it, and the display `\sum` came out a text-size sigma. The same
 holds wherever the notation asks for a face rather than a letter: `\mathbb`,
 `\mathcal`, `\mathscr`, `\mathfrak`, `\mathtt`, `\mathsf`. Those classes are
 handed back to KaTeX's own declarations, so `--font-math` governs the roman,
-the italic and the bold, and nothing that only exists in a KaTeX face. The
-delimiters and the two script faces are the only files the deck fetches from
-the network; a render without one degrades to small delimiters rather than to
-nothing.
+the italic and the bold, and nothing that only exists in a KaTeX face.
+
+One more is handed back for a reason of its own. KaTeX stacks `\hat{x}` by
+putting the accent and the letter at the same height and relying on the
+circumflex at U+005E being drawn up at accent height, which is how
+`KaTeX_Main` draws it; Times has an ordinary circumflex at that codepoint, low
+and larger, so the accent came down onto the letter. The accent glyph
+therefore goes back to `KaTeX_Main` too, and every offset KaTeX computed is
+true again.
+
+Those handed-back faces are the only files the deck fetches from the network:
+`KaTeX_Size1`–`Size4` for the delimiters and the display operators,
+`KaTeX_AMS`, `KaTeX_Caligraphic`, `KaTeX_Fraktur`, `KaTeX_Script`,
+`KaTeX_SansSerif` and `KaTeX_Typewriter` for the notation faces, and
+`KaTeX_Main` for the accents. A render that cannot reach them degrades to small
+delimiters and an accent sitting on its letter, not to nothing.
 
 Montserrat is **embedded in the CSS as base64**, as a variable font of weight
-100–900 in the `latin` and `latin-ext` subsets. Composing and exporting need
-neither an internet connection nor installed fonts, and the HTML and PDF you
-export are self-contained — the KaTeX faces above are the one exception, and
-only on a deck that sets maths. That is most of the theme's ~300 kB. Code is
-set in Consolas with system fallbacks; no monospaced font is embedded.
+100–900, roman and italic, in the `latin` and `latin-ext` subsets — four faces
+in all. Composing and exporting need neither an internet connection nor
+installed fonts, and the HTML and PDF you export are self-contained — the KaTeX
+faces above are the one exception, and only on a deck that sets maths. They are
+~300 kB of the theme's ~420 kB. Code is set in Consolas with system fallbacks;
+no monospaced font is embedded.
 
 The theme is MIT licensed. Montserrat is under the SIL Open Font License 1.1.
 `assets/placeholder.jpg` is filler for the example deck only — replace it with
