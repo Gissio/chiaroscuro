@@ -1695,6 +1695,20 @@ section.board > p:has(> img[src^="data:image/svg"]:only-child) { display: conten
 :is(.right, .left) :is(img, svg), section.board :is(img, svg) { max-width: 100%; max-height: 100%; }
 
 /*
+ * And one thing in the field is not a picture. KaTeX does not draw a tall
+ * delimiter with a glyph — past the four sizes it stacks an inline `<svg>` and
+ * lets it grow — so the cap above was landing on the brackets of a matrix, the
+ * bar of a tall fraction and every stretched parenthesis, and they resolved to
+ * nothing at all: a five-row matrix in a free field came out as five rows of
+ * numbers with no brackets around them, on a layout where the same maths one
+ * slide earlier had been fine. Nothing warns, because the maths itself still
+ * typesets. Hand KaTeX's own drawings back their size; the cap stays where it
+ * was for everything a slide actually puts in the field as a picture.
+ */
+:is(.right, .left) .katex svg,
+section.board .katex svg { max-width: none; max-height: none; }
+
+/*
  * `left` is the same field on the other half, for a slide mirrored the way a
  * photograph mirrors it. A `![bg left]` says which side the picture is on and
  * the layout follows; a field has no such mark, so here you say it yourself —

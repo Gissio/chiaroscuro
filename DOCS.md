@@ -1009,6 +1009,21 @@ Those handed-back faces are the only files the deck fetches from the network:
 `KaTeX_Main` for the accents. A render that cannot reach them degrades to small
 delimiters and an accent sitting on its letter, not to nothing.
 
+Past those four sizes KaTeX stops swapping glyphs and **draws** the delimiter:
+the brackets of a five-row matrix, a tall `\left(`, an over-brace are an inline
+`<svg>` it stretches itself. That collides with the cap the free fields put on a
+picture — `half`, `board` and the `right`/`left` boxes size a diagram to their
+own bounds — and a capped drawing resolves to nothing: the matrix typesets, the
+brackets around it are simply absent, on a layout where the same maths one
+slide earlier was fine. The theme hands KaTeX's own drawings back their size
+inside those fields, so nothing has to be said in the deck.
+
+One thing does have to be said in the deck. **Rows are separated with `\cr`,
+not `\\`**: markdown reads a double backslash as an escaped one and KaTeX never
+sees the break, so a matrix written the ordinary way comes out as a single row,
+again without an error anywhere. `\cr` is TeX's own primitive, it means the
+same thing, and markdown has no opinion about it.
+
 Montserrat is **embedded in the CSS as base64**, as a variable font of weight
 100–900, roman and italic, in the `latin` and `latin-ext` subsets — four faces
 in all. Composing and exporting need neither an internet connection nor
