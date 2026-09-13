@@ -192,7 +192,9 @@ The right half does not have to be a photo. Wrap anything in a `div` with the
 `right` class and you get **the free field**, the box `split` and `board` are
 built on too: whatever it carries is stacked and centred on both axes, with no
 type style and no inset of its own, so it takes a code block, a list, a table,
-a picture, an inline SVG or one big glyph as readily as a paragraph. Here it
+a picture, an inline SVG or one big glyph as readily as a paragraph. The rows
+of a paragraph that wraps are centred too; those of a list or a code block range
+left while their box stays centred, as on `poster`. Here it
 gets the full 960 px — a code panel bleeds off the right edge of the slide,
 which is the intent, not an oversight. A table alone keeps the width of its own
 contents, centred; wrap it in `wide` to fill the field instead:
